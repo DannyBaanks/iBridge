@@ -1,0 +1,40 @@
+{
+  "schema": "ibridge.receipt.v1",
+  "operation_id": "doctor-20260919063419-eb1cefef",
+  "ibridge_version": "0.1.0",
+  "host_alias": "fb386f331eaaded1",
+  "device_alias": null,
+  "device": null,
+  "capability": "doctor_orchestration",
+  "authority": {
+    "requested": [
+      "doctor_orchestration"
+    ],
+    "allowed": [
+      "doctor_orchestration"
+    ],
+    "denied": []
+  },
+  "input": {
+    "pack_sha256": "f885ee352f4944b6f2635b22fe1d9909be425bf7e84827fedac820b66968774a",
+    "receiver_url": "http://127.0.0.1:8377",
+    "arguments": [
+      "doctor"
+    ]
+  },
+  "transport": {
+    "usbmuxd": true,
+    "receiver": true,
+    "detail": "0 device(s) enumerated via usbmuxd"
+  },
+  "started_at": "2026-09-19T06:34:19Z",
+  "finished_at": "2026-09-19T06:34:19Z",
+  "execution_result": "no_report_bound: no bind mode selected: use --bind-report <path> or --wait <seconds> (the Doctor app on the phone requires a manual tap; iBridge cannot remote-trigger it)",
+  "evidence_verdict": null,
+  "evidence": [],
+  "verdict": "NOT_DEMONSTRATED",
+  "notes": [
+    "no_device_discovered: receiver/pack checks continue; device identity is ABSENT from this receipt (honest absence — nothing fabricated)",
+    "no partial evidence was promoted to PASS"
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "schema": "ibridge.receipt.v1",
+  "operation_id": "doctor-20260919063342-16b6d501",
+  "ibridge_version": "0.1.0",
+  "host_alias": "fb386f331eaaded1",
+  "device_alias": null,
+  "device": null,
+  "capability": "doctor_orchestration",
+  "authority": {
+    "requested": [
+      "doctor_orchestration",
+      "bogus_capability"
+    ],
+    "allowed": [
+      "doctor_orchestration"
+    ],
+    "denied": [
+      "bogus_capability"
+    ]
+  },
+  "input": {
+    "pack_sha256": null,
+    "receiver_url": "",
+    "arguments": [
+      "doctor",
+      "--with",
+      "bogus_capability"
+    ]
+  },
+  "transport": {
+    "usbmuxd": false,
+    "receiver": false,
+    "detail": ""
+  },
+  "started_at": "2026-09-19T06:33:42Z",
+  "finished_at": "2026-09-19T06:33:42Z",
+  "execution_result": "denied_by_authority",
+  "evidence_verdict": null,
+  "evidence": [],
+  "verdict": "DENIED",
+  "notes": [
+    "authority: bogus_capability denied: unknown capability; deny"
+  ]
+}

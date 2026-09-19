@@ -1,0 +1,10 @@
+{
+  "schema": "ibridge.device.v1",
+  "observedAt": "2026-09-19T06:33:40Z",
+  "host_alias": "fb386f331eaaded1",
+  "devices": [],
+  "usbmuxd": {
+    "reachable": false,
+    "detail": "usbmuxd unreachable: Socket(Os { code: 10061, kind: ConnectionRefused, message: \"No se puede establecer una conexión ya que el equipo de destino denegó expresamente dicha conexión.\" })"
+  }
+}

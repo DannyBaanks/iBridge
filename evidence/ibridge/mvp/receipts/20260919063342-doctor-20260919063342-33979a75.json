@@ -1,0 +1,44 @@
+{
+  "schema": "ibridge.receipt.v1",
+  "operation_id": "doctor-20260919063342-33979a75",
+  "ibridge_version": "0.1.0",
+  "host_alias": "fb386f331eaaded1",
+  "device_alias": null,
+  "device": null,
+  "capability": "doctor_orchestration",
+  "authority": {
+    "requested": [
+      "doctor_orchestration",
+      "signing"
+    ],
+    "allowed": [
+      "doctor_orchestration"
+    ],
+    "denied": [
+      "signing"
+    ]
+  },
+  "input": {
+    "pack_sha256": null,
+    "receiver_url": "",
+    "arguments": [
+      "doctor",
+      "--with",
+      "signing"
+    ]
+  },
+  "transport": {
+    "usbmuxd": false,
+    "receiver": false,
+    "detail": ""
+  },
+  "started_at": "2026-09-19T06:33:42Z",
+  "finished_at": "2026-09-19T06:33:42Z",
+  "execution_result": "denied_by_authority",
+  "evidence_verdict": null,
+  "evidence": [],
+  "verdict": "DENIED",
+  "notes": [
+    "authority: signing denied: signing is an explicit-only capability and is not implemented in the iBridge MVP; denied (fail closed). It would act on the linked Apple account and must never run as a side effect."
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "schema": "ibridge.receipt.v1",
+  "operation_id": "doctor-20260919063419-5b7f06f9",
+  "ibridge_version": "0.1.0",
+  "host_alias": "fb386f331eaaded1",
+  "device_alias": null,
+  "device": null,
+  "capability": "doctor_orchestration",
+  "authority": {
+    "requested": [
+      "doctor_orchestration"
+    ],
+    "allowed": [
+      "doctor_orchestration"
+    ],
+    "denied": []
+  },
+  "input": {
+    "pack_sha256": null,
+    "receiver_url": "http://127.0.0.1:8377",
+    "arguments": [
+      "doctor",
+      "--pack-file",
+      "evidence\\garbage-pack.json"
+    ]
+  },
+  "transport": {
+    "usbmuxd": true,
+    "receiver": true,
+    "detail": "0 device(s) enumerated via usbmuxd"
+  },
+  "started_at": "2026-09-19T06:34:19Z",
+  "finished_at": "2026-09-19T06:34:19Z",
+  "execution_result": "malformed_pack_rejected: pack is not valid JSON: expected ident at line 1 column 2",
+  "evidence_verdict": null,
+  "evidence": [
+    {
+      "role": "malformed_pack_rejected",
+      "path": "evidence\\garbage-pack.json",
+      "sha256": "276919f0503abf4ec204b55432d333c439e8d51c7f65d57d3b2f619d751ad569"
+    }
+  ],
+  "verdict": "ERROR",
+  "notes": [
+    "no_device_discovered: receiver/pack checks continue; device identity is ABSENT from this receipt (honest absence — nothing fabricated)"
+  ]
+}

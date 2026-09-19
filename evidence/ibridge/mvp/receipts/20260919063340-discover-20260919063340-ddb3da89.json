@@ -1,0 +1,43 @@
+{
+  "schema": "ibridge.receipt.v1",
+  "operation_id": "discover-20260919063340-ddb3da89",
+  "ibridge_version": "0.1.0",
+  "host_alias": "fb386f331eaaded1",
+  "device_alias": null,
+  "device": null,
+  "capability": "discovery",
+  "authority": {
+    "requested": [
+      "discovery"
+    ],
+    "allowed": [
+      "discovery"
+    ],
+    "denied": []
+  },
+  "input": {
+    "pack_sha256": null,
+    "receiver_url": "",
+    "arguments": [
+      "discover"
+    ]
+  },
+  "transport": {
+    "usbmuxd": true,
+    "receiver": false,
+    "detail": "0 device(s) enumerated via usbmuxd"
+  },
+  "started_at": "2026-09-19T06:33:40Z",
+  "finished_at": "2026-09-19T06:33:40Z",
+  "execution_result": "devices_enumerated:0",
+  "evidence_verdict": null,
+  "evidence": [
+    {
+      "role": "discover_output",
+      "path": "evidence/ibridge/mvp\\discover-20260919063340.json",
+      "sha256": "0991d7f197aa5f3cdcee7a40bc9c43c237f7eb0917f80845e5e85458f25847a7"
+    }
+  ],
+  "verdict": "NOT_DEMONSTRATED",
+  "notes": []
+}

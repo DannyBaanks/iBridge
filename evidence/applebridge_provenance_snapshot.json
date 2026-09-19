@@ -1,0 +1,548 @@
+{
+  "snapshot_at": "2026-09-19T06:35:00Z",
+  "source_path": "C:\\Development\\ISyCo Git\\AppleBridge",
+  "files": 135,
+  "tree_sha256": "3abe4b37c4107058349d5eff6e651ddc383a8d449839d22813a4b3779500970e",
+  "entries": [
+    {
+      "path": ".git/COMMIT_EDITMSG",
+      "sha256": "e3fff900841de238b39e3e1db9326498f2994f8d4b4b9d0a1007e536870ed676"
+    },
+    {
+      "path": ".git/config",
+      "sha256": "a791fb0c11676d46c8aac869f7cfe520f3611c3fa338c15bfe3f01f75224b8ec"
+    },
+    {
+      "path": ".git/description",
+      "sha256": "85ab6c163d43a17ea9cf7788308bca1466f1b0a8d1cc92e26e9bf63da4062aee"
+    },
+    {
+      "path": ".git/HEAD",
+      "sha256": "f6f2b945f6c411b02ba3da9c7ace88dcf71b6af65ba2e0d89aa82900042b5a10"
+    },
+    {
+      "path": ".git/hooks/applypatch-msg.sample",
+      "sha256": "0223497a0b8b033aa58a3a521b8629869386cf7ab0e2f101963d328aa62193f7"
+    },
+    {
+      "path": ".git/hooks/commit-msg.sample",
+      "sha256": "efc1401b0e99d1ff51494d154d98b46c1e99059bcd8bf9f73cecde19fd3eb23b"
+    },
+    {
+      "path": ".git/hooks/fsmonitor-watchman.sample",
+      "sha256": "9159720099ad5595b8e66645cbfd47763c1e920f46e0b50ae75e642bbec57ef0"
+    },
+    {
+      "path": ".git/hooks/post-update.sample",
+      "sha256": "81765af2daef323061dcbc5e61fc16481cb74b3bac9ad8a174b186523586f6c5"
+    },
+    {
+      "path": ".git/hooks/pre-applypatch.sample",
+      "sha256": "e15c5b469ea3e0a695bea6f2c82bcf8e62821074939ddd85b77e0007ff165475"
+    },
+    {
+      "path": ".git/hooks/pre-commit.sample",
+      "sha256": "57185b7b9f05239d7ab52db045f5b89eb31348d7b2177eab214f5eb872e1971b"
+    },
+    {
+      "path": ".git/hooks/pre-merge-commit.sample",
+      "sha256": "d3825a70337940ebbd0a5c072984e13245920cdf8898bd225c8d27a6dfc9cb53"
+    },
+    {
+      "path": ".git/hooks/pre-push.sample",
+      "sha256": "ecce9c7e04d3f5dd9d8ada81753dd1d549a9634b26770042b58dda00217d086a"
+    },
+    {
+      "path": ".git/hooks/pre-rebase.sample",
+      "sha256": "4febce867790052338076f4e66cc47efb14879d18097d1d61c8261859eaaa7b3"
+    },
+    {
+      "path": ".git/hooks/pre-receive.sample",
+      "sha256": "a4c3d2b9c7bb3fd8d1441c31bd4ee71a595d66b44fcf49ddb310252320169989"
+    },
+    {
+      "path": ".git/hooks/prepare-commit-msg.sample",
+      "sha256": "e9ddcaa4189fddd25ed97fc8c789eca7b6ca16390b2392ae3276f0c8e1aa4619"
+    },
+    {
+      "path": ".git/hooks/push-to-checkout.sample",
+      "sha256": "a53d0741798b287c6dd7afa64aee473f305e65d3f49463bb9d7408ec3b12bf5f"
+    },
+    {
+      "path": ".git/hooks/sendemail-validate.sample",
+      "sha256": "44ebfc923dc5466bc009602f0ecf067b9c65459abfe8868ddc49b78e6ced7a92"
+    },
+    {
+      "path": ".git/hooks/update.sample",
+      "sha256": "8d5f2fa83e103cf08b57eaa67521df9194f45cbdbcb37da52ad586097a14d106"
+    },
+    {
+      "path": ".git/index",
+      "sha256": "d1120de0328a5c9a061733c4c7e713b9ddaadfa218f9e314c447c08ff2b2dbb9"
+    },
+    {
+      "path": ".git/info/exclude",
+      "sha256": "6671fe83b7a07c8932ee89164d1f2793b2318058eb8b98dc5c06ee0a5a3b0ec1"
+    },
+    {
+      "path": ".git/logs/HEAD",
+      "sha256": "84699732f75be2a900d2e014ac6ba6236fd47a12c9c19b404ca6adede7440ddc"
+    },
+    {
+      "path": ".git/logs/refs/heads/master",
+      "sha256": "84699732f75be2a900d2e014ac6ba6236fd47a12c9c19b404ca6adede7440ddc"
+    },
+    {
+      "path": ".git/logs/refs/remotes/origin/master",
+      "sha256": "7fbb2f256c4684a26bbb1b05970e2b3d0d2b73b66dbf68023296c611c660cdee"
+    },
+    {
+      "path": ".git/objects/00/337f37c5240a1754207cfd3746412e98bad60e",
+      "sha256": "77696c5e9bb61aad8ee27bf698bd78549c36c59e5fa49442945c151e26f58056"
+    },
+    {
+      "path": ".git/objects/05/f8d1f625126b9c8afe802c914e621a38c23c26",
+      "sha256": "62d26b32c150058d2ee4a86d6ff2940d9db707c2069dee6113381734d62df763"
+    },
+    {
+      "path": ".git/objects/0b/3c529d5a3ab0db5b3444498058717a5966e102",
+      "sha256": "e58297604529ca062e8c6ce8d2c90790b42fd38dcd1c6f5405fa9d67e15f2cf6"
+    },
+    {
+      "path": ".git/objects/0e/43d62df7a1b6d5688329a187abd51a60abe6b9",
+      "sha256": "9083113f66f2cd7a0ad869001ef9c4a37b3eda6fc1b7ea03f79d672c50191124"
+    },
+    {
+      "path": ".git/objects/16/d5b27968b13c21575ee582cca7e48e4ca8fea8",
+      "sha256": "ef3d033511a102e5672e4cf54b5209ef5dd7bb4bd1668230469a8faf9af8057c"
+    },
+    {
+      "path": ".git/objects/19/21558bacf1cb57eeb823757f1781617afd1ec6",
+      "sha256": "6df6254c26eb9f5be82fd264ea1be5e7b049dad8313bcc93698953c4f89fff7e"
+    },
+    {
+      "path": ".git/objects/1d/6eafc98adcd3b8494cf4bc8f0e9873ca948712",
+      "sha256": "03bf4bf96762d9e7f0ed3d7b2246ed9421804baa6850ae896a6590e0b09e4d60"
+    },
+    {
+      "path": ".git/objects/22/ba0d6bdd35a937f838853a5b26e157150ecffd",
+      "sha256": "526eabbbab4891e6b9d4f4817277c191e4127b59bc2e1fa24b5c1cb18b31f857"
+    },
+    {
+      "path": ".git/objects/25/9f7179780986e07e168bb04db86ca19626e61f",
+      "sha256": "86efa43980bd0a78b109fe4779e14a73ee583439246139af908a055e8ccdf8a6"
+    },
+    {
+      "path": ".git/objects/29/e1a24ededea2e1c3af06765fbc9a22e75712f7",
+      "sha256": "62ed16ca7e8fd37dede3090b55704e6a9ed3d374169dea25a071fab146b8e1db"
+    },
+    {
+      "path": ".git/objects/32/475c56722aefeed39797716d6ed1790e4e145e",
+      "sha256": "f67da25ac5fe54e7e1e3f08ea5dc484d16826ecc592b0d2cd3ab723c486d8110"
+    },
+    {
+      "path": ".git/objects/36/951cd4502fc78cb3db8b0316c59b16ce9c6685",
+      "sha256": "9017c31ddcc9ac8d0eeaa7a834fe91811af61a1942ff8948399fba5ce675752f"
+    },
+    {
+      "path": ".git/objects/3e/4a0f51dc20bd2da291e96d0d6baafe7fea29a8",
+      "sha256": "ce959d88fd158214f3898c0e17ad27d3d0794322ef6576436c1e070cdb75ec3c"
+    },
+    {
+      "path": ".git/objects/41/be59e842afd75bfbcaa91f7f0973f0f5cc0c5c",
+      "sha256": "cc96e38d56892ffd0e6f70a36b328dcee6b61596ab2bf77224384e83450af3f1"
+    },
+    {
+      "path": ".git/objects/43/a438b76bf4bdd7765bd5da13460cf83563ce1f",
+      "sha256": "43a901348ec445f0bc3bde3530066bbfe0d2c8057c6ac36bde387fdf62f7b438"
+    },
+    {
+      "path": ".git/objects/46/027fe8d5eceb0362af5cec8c3db685ad2d89e9",
+      "sha256": "ad49d8cea5ec5c96a7cae390f162043bff362083e817ca7c1b2a6b9ea5be9ee6"
+    },
+    {
+      "path": ".git/objects/46/cf714ec090ec087806b3fc59187a816e5adec2",
+      "sha256": "acbbc844774cc0130e9743de475d9e1088027f5df21909125d3662c6e9d78011"
+    },
+    {
+      "path": ".git/objects/4d/206d6d5528c122a227e12e73bb3bc21c979390",
+      "sha256": "8ec3461ad9c9cbfc0ed5eb1590509ade4c4c5b8ce608a4d1b6ed8e73939e798f"
+    },
+    {
+      "path": ".git/objects/4f/056b3647bc473922081f2fd4fa6dcf4c6ccb14",
+      "sha256": "e6584b6040b75a84869e6c12a903fbbce2d501713b103d4be6f0a1cd900fc6cc"
+    },
+    {
+      "path": ".git/objects/50/9f0b9627461eaf833ea1b2020b47d9b3f543a0",
+      "sha256": "4ada5c27aba3c84e245fe83437410a0ba738f6157a04b784e1a60b2ecf0c59bc"
+    },
+    {
+      "path": ".git/objects/53/9f09471750e0e2c73392bab619a6da5e1c3900",
+      "sha256": "5e05d2cec5d4f735dd9ade2e3976bbdda6553ebae623e87c94c9cdf40ccb01d0"
+    },
+    {
+      "path": ".git/objects/60/0e3a8456b1da39b6bc3714853153548c37ca24",
+      "sha256": "f283ad98b067f4a56723ba0fad83d456f2a18efc7c2a505c34e9810cb3f339ab"
+    },
+    {
+      "path": ".git/objects/60/3bc6c606f7cb2c0f930393904d7024bf20b47f",
+      "sha256": "55d708e9ad8c66ca430d73391c63eaa3d0304586ef15d4ea00a66dd12ac8963c"
+    },
+    {
+      "path": ".git/objects/62/7fb891023ed9e2bad82044e0d5446fde914fea",
+      "sha256": "3ce7c5cf70c97077ae4b7482f0d9d5cabc93bb5a2b757ed83534bd33fc0f17da"
+    },
+    {
+      "path": ".git/objects/62/a490b5ef36b32bb14388dd893de44a07c5113c",
+      "sha256": "e6b7c926acca9a4508a977d71942ba90f684b553ad592c108c883b9827b0f70b"
+    },
+    {
+      "path": ".git/objects/64/b089544bbe67d8014fdc4e7b753778d6c99ed9",
+      "sha256": "fc48c01a9349d1aed8eb1e673a8f29a5609f326eb13c70cc3d3ee0f39267e83b"
+    },
+    {
+      "path": ".git/objects/66/18236f22c32659d8c9e8a9c4b2d612559dd08f",
+      "sha256": "5c7a5a0de07d677590b0a4f5d37b99f6245ad398d19300e10c46b20b53c7c2e4"
+    },
+    {
+      "path": ".git/objects/6b/6c02eb928832f29299f4644c02457806b70a46",
+      "sha256": "a48754302acc3f4a6e837a5c3947f6c7c6cf5eb1216fe3cbcc59a8ad7a4637fe"
+    },
+    {
+      "path": ".git/objects/6f/58cdf4f989b7b365f1147c6b5e0ee57d1bb70f",
+      "sha256": "a56a175bfdcd90c4ff6e6216758f743da0582dd724c0c134fdc43ec41f9074e6"
+    },
+    {
+      "path": ".git/objects/75/4e718dd891d7697a62ae7977abf95d87160709",
+      "sha256": "5bd7298673a4856ca6da5425b3d5459d867e12d76ac889237af6bc8747e3cce1"
+    },
+    {
+      "path": ".git/objects/76/ba4f6171c16892f728d985cfdaa58d13c56a92",
+      "sha256": "ba7ee2721d04e1710d40bec499dbf96b8933dabd077fa4189e398ce5a21d3426"
+    },
+    {
+      "path": ".git/objects/7d/0436c20c6435224efdf22b55b0640f7dbed74a",
+      "sha256": "41f8abbc662aefefe86652a8167e4cacc85632ee0e737f0ff3868cc6dd6b5da2"
+    },
+    {
+      "path": ".git/objects/85/24b02f5be2a10b87607571b489d505382f6551",
+      "sha256": "e57b27bb3ed57a88849f8c6457085a8a390dbf480fa0e0707f7cefd99417b8fa"
+    },
+    {
+      "path": ".git/objects/85/e570fbc9e24da10d6e9d6951dfa7b9eff107a8",
+      "sha256": "6b466409baa9f75a08f41aa5e17fc08d60b2018ccb4646bfa7a9ffcc7a10fe6d"
+    },
+    {
+      "path": ".git/objects/8d/e5a32219edf6c4e004b075fdad37232e5a7949",
+      "sha256": "1659233a6e21292db55eb2d52c4db709ba463d07340c1c4467730543c617c92d"
+    },
+    {
+      "path": ".git/objects/8e/6fe80c0784a52d316e97aa7988e87b1bd4cc3f",
+      "sha256": "f5718c56488f4b40381091c4d11ebb37a94d9cd6ce813e5c50262114702e7e09"
+    },
+    {
+      "path": ".git/objects/97/9be0a8f166c1dd3de74a29f912af35f732a7b1",
+      "sha256": "9db213d924cc75045156591a0434da2c77704463e59c5844913504c6b0ce49be"
+    },
+    {
+      "path": ".git/objects/9d/98bfd7891f7dadf1873800be412f07fe5317c1",
+      "sha256": "aeaa6a1a46e652951b34557c7d3dd1f0e131a5bd5a46b93af51c4ed5dcf548ff"
+    },
+    {
+      "path": ".git/objects/9e/21a27c82d0605760cab6f0f44b5dd78a136b4b",
+      "sha256": "e59ed48e9703f0f77933f668fe1014ea9262a126666dafe81ca24a66a963c104"
+    },
+    {
+      "path": ".git/objects/9e/738712175f1ffced5109435b11f5911cd02eb8",
+      "sha256": "f99d52259f34ca8d78a2e77131459b69da170bde82a7f9c7b116cf5fb5edc8b1"
+    },
+    {
+      "path": ".git/objects/9e/fc80225f101bff92542322a2b4c5b1f1669226",
+      "sha256": "99c2b05d6676afaf9c2b221c8878e6222abe596712149eca18bb4fc4b80db6e2"
+    },
+    {
+      "path": ".git/objects/a3/48b05fbb1360e35b0aec5534cd5adbfe55511a",
+      "sha256": "9cf32bb1da2c98976e9dc190d62ed5c2b8c39b03e5d785fc9ab9fc776bbbbf2d"
+    },
+    {
+      "path": ".git/objects/a5/601b464aa3be4166c5a9bdf97f5a54895f4356",
+      "sha256": "92d3f64176e3ce1d62e9cb3bde18f1f13f8d2be8e3fc60ad8fbf973a71564ac2"
+    },
+    {
+      "path": ".git/objects/ac/404862655030e8a9cee95c52018c450b40159d",
+      "sha256": "ca32d2386a54c88fc7c76fea16e909260a432b997654805ecdf9a9b0a967f724"
+    },
+    {
+      "path": ".git/objects/b4/8f4cca5087a9f3a86b0ef811105e03cd59ec30",
+      "sha256": "ae4b946159a08b6b3ef287b81858ebcd6e786ea33600a98073823706a9a4ce16"
+    },
+    {
+      "path": ".git/objects/bc/424e2725b3dc792de0e20b6d7f998ad5000a10",
+      "sha256": "650196b873fe8dd8edba384aebcf018aa93083d6b59e0d925796c9058794c3e9"
+    },
+    {
+      "path": ".git/objects/c7/28525c89b2dc06239ec72a9d1786c59e318bba",
+      "sha256": "031d1aeb3582bcd61fe04a20ae7c872cab5125c6f949de59d7cb9d1c7aa3b62b"
+    },
+    {
+      "path": ".git/objects/c9/e491d0d399fb5bb76f7d49b0bdfb4251fbabe9",
+      "sha256": "10168970770c9ca3b6b7049f42f1b6f316c3fac16048d5134ae11483176dc9bc"
+    },
+    {
+      "path": ".git/objects/cb/5b0e2b3deedd245e4c9c506765b2e0efabd016",
+      "sha256": "8f40b75ae8de4743db33c64b1083681b0e0d0b8be7bb003ac54fe0a6ca807f50"
+    },
+    {
+      "path": ".git/objects/cb/c17b97d2b2baf31ecd55024307a5ca2faa57b7",
+      "sha256": "a36320f2ab3d070aae7f271d6638785d10c0cc3cb8f0917b659e84f505c4ed18"
+    },
+    {
+      "path": ".git/objects/d3/022ca9bfaf1f967d937a04a2cbc1875ff24e7e",
+      "sha256": "2bc2d0d89b8c09869b1ccbd69ecbcc72576b657d449dd24f4d794958ebfa38ca"
+    },
+    {
+      "path": ".git/objects/d7/d576aa17e51b7fec29a4cc22b62f2d7b0be29e",
+      "sha256": "c326b6c58dd84c688019bf14a9d760ada0e0398a03dc81579a964432697f0dd4"
+    },
+    {
+      "path": ".git/objects/e6/9de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "sha256": "ec9e2b1c2a4773aee4bff2082c979557b479e8ecaa04ebd15271c3c78af34718"
+    },
+    {
+      "path": ".git/objects/f3/69de7114d9097d569fe988a56bf1e443e92308",
+      "sha256": "b4c32916fa18d597815b2bc594e3f86dfb7dbf0680cc834bc548fe7a38ac9dc0"
+    },
+    {
+      "path": ".git/objects/f4/648026aadd2ed4b743b2ac3909573cf86f8f77",
+      "sha256": "e81ec40766925056088d4d3de7b2ea483e6df68c9aaf86cf7599003366a60905"
+    },
+    {
+      "path": ".git/objects/f5/ea9bb4a075af09562a3861321838173c3ac2b2",
+      "sha256": "7f8a0dc7f06d9e8c540533b498e9f02f9364e98629688bb44bd5f1160bc1e8e8"
+    },
+    {
+      "path": ".git/objects/fa/89e98ca2b2e21eb694f26d4074b513841cba8f",
+      "sha256": "1e05c4a6323e1802120c5d044fae616ecb9786437c137c0b5df14cec81661029"
+    },
+    {
+      "path": ".git/objects/fc/25bde44bbb3748b35d1f49d623c2d63f15db1d",
+      "sha256": "a0ebfffc9158e230425c98ca75475835cd7a949cf0babeb107cf8464a3746fba"
+    },
+    {
+      "path": ".git/refs/heads/master",
+      "sha256": "192315855fcbdb45c0f2ef37acdc4629cf46209cdf572e2656592f66b620b206"
+    },
+    {
+      "path": ".git/refs/remotes/origin/master",
+      "sha256": "192315855fcbdb45c0f2ef37acdc4629cf46209cdf572e2656592f66b620b206"
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "8ce77a2f2f511129354c1e82d761615278b1ada4b96aea7962e663d2c61cb13c"
+    },
+    {
+      "path": "docs/ARCHITECTURE.md",
+      "sha256": "7aa3c9a6dcebd5108f04ebcf13610ccc19f92ff760c71a375e4f80d297b3dd36"
+    },
+    {
+      "path": "docs/EVIDENCE_IOS_DOCTOR.md",
+      "sha256": "dc10876dbf8aec9c627de9810bbd73c11c6f8f59f7a62882a2b0cfdd1e94e4be"
+    },
+    {
+      "path": "docs/IOS_DEVICE_PROBE_MATRIX.md",
+      "sha256": "4c70c5e8c3024fb36f59233a20658458294f03941596686703ab10e613dfeda1"
+    },
+    {
+      "path": "docs/LEGAL_BOUNDARY.md",
+      "sha256": "959b92a02ae59ff442cfe8e6ebfabd588d7837360f265394effa4358ca9620a6"
+    },
+    {
+      "path": "docs/OPENCODENATIVE_INTEGRATION.md",
+      "sha256": "1ca643e0846d5a38497d1165f9e3f10fc6e29dabffc271daf0484a3f4cd778ca"
+    },
+    {
+      "path": "docs/PROVIDERS.md",
+      "sha256": "970709f7970435c4b85fa9ffde1f5cb089c29411fc727c2bdf5e215162386b4e"
+    },
+    {
+      "path": "examples/capabilities-matrix.json",
+      "sha256": "1dfddf460b04a0f2e21a327eac87e2f47de7caf1174495b6816f3f79661128a8"
+    },
+    {
+      "path": "examples/probe-pack.v1.json",
+      "sha256": "f885ee352f4944b6f2635b22fe1d9909be425bf7e84827fedac820b66968774a"
+    },
+    {
+      "path": "examples/request-dry-run.json",
+      "sha256": "f2248112680f189390889a3cfaedcf7b998d3d4538aa99c4025334204cf8ba17"
+    },
+    {
+      "path": "examples/request.example.md",
+      "sha256": "6c9b4e7cec3404c28e30fca90e2b13eb1a94c77f014407b4d4ea9b499eb4ac38"
+    },
+    {
+      "path": "examples/result-real-ios.test.json",
+      "sha256": "65bc0c6f01d8dffa1fb18961738d061a23cbdb6ea9e763d1cc63a554a7371464"
+    },
+    {
+      "path": "GUIA.md",
+      "sha256": "62bc9228d90ba256ccaaac7234b79ee0294059ff8507d55bdcca1587bd567307"
+    },
+    {
+      "path": "pyproject.toml",
+      "sha256": "54c0afe25be37bb475c85b3ce0d2c53276154aee01e704f21ab4f5fbac9f6794"
+    },
+    {
+      "path": "README.md",
+      "sha256": "ac61b92b4da785fac92ffcda1eb76582395e40206b710228aefeca245342571c"
+    },
+    {
+      "path": "receiver.err.log",
+      "sha256": "c80e24a6b0e8137dbb1a473aacffe7af1eb58b0c84b9c81baa947d43bc9c382e"
+    },
+    {
+      "path": "receiver.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "schemas/device.report.v1.json",
+      "sha256": "753d5b5abe1e5d58db726baa3dfd3e99adecc994a84bf9766471bebcb4bb4873"
+    },
+    {
+      "path": "schemas/probe-pack.v1.json",
+      "sha256": "b0121a3a198eff4f97a90f610c67a94cf4a8322a9ee5f77fdd8f8f0c31f79e22"
+    },
+    {
+      "path": "schemas/request.v1.json",
+      "sha256": "445e6bf742661564e09f1919e08c5a648173acab8589f6d23ede22addb500719"
+    },
+    {
+      "path": "schemas/result.v1.json",
+      "sha256": "03a4a6e5067258e556aa43244604573e66097c00cb2517e0dcb1d522fa41b820"
+    },
+    {
+      "path": "src/applebridge/__init__.py",
+      "sha256": "8fccfefefb2b456254b67bdb6fe0d4df2214c634e72963fc72815c78ec51a84b"
+    },
+    {
+      "path": "src/applebridge/cli.py",
+      "sha256": "7e15803e1dd08c8f99b4cb550e5da00eeaad0bb5f4d07b5688551db5dad24cda"
+    },
+    {
+      "path": "src/applebridge/contracts.py",
+      "sha256": "e0ff3f2cc5af6006aa24f1561ed3b5376702e5ef40298eed5181f9d6d8b7c035"
+    },
+    {
+      "path": "src/applebridge/device_report.py",
+      "sha256": "1a63fbcc0d59d11e88517342a30070a122b341c7561934268c13d73f15d3adb9"
+    },
+    {
+      "path": "src/applebridge/doctor.py",
+      "sha256": "68e2eab6cac7eb794726492de162728893c5a1d53ded36a3908a4411732afc7a"
+    },
+    {
+      "path": "src/applebridge/providers/__init__.py",
+      "sha256": "78d2ad9f6d24f191841efb8821d51b30f149c0e85f277a4d4734a66c75f1f150"
+    },
+    {
+      "path": "src/applebridge/providers/base.py",
+      "sha256": "ae235a64e61988b34e26c5751f7cf145a7a61876f20c2c9ff8f1d3ef657b1768"
+    },
+    {
+      "path": "src/applebridge/providers/github_macos.py",
+      "sha256": "56bd012cc9104235a28e0a4db17b95e64673f951fb37c8e3a09afd6f2505a1e2"
+    },
+    {
+      "path": "src/applebridge/providers/mock.py",
+      "sha256": "60715470168c710b74d38acc0ef9f55030b92919df61b17cdce757dbdeef6733"
+    },
+    {
+      "path": "src/applebridge/receipts.py",
+      "sha256": "09f394dd48933460dd860fd3158860145d3e44cbf914e7f9c31477351394eb1c"
+    },
+    {
+      "path": "src/applebridge/receiver.py",
+      "sha256": "ee148a4e3f4d8ac73e1b2717b630eb968f155e54a71a396229a4547e911bc841"
+    },
+    {
+      "path": "src/applebridge/redact.py",
+      "sha256": "89f5328b9fcc831a8206efcff38ea72b206b06f5d71873b9432a5de450820760"
+    },
+    {
+      "path": "src/applebridge/schema_data/v1/device.report.v1.json",
+      "sha256": "753d5b5abe1e5d58db726baa3dfd3e99adecc994a84bf9766471bebcb4bb4873"
+    },
+    {
+      "path": "src/applebridge/schema_data/v1/probe-pack.v1.json",
+      "sha256": "b0121a3a198eff4f97a90f610c67a94cf4a8322a9ee5f77fdd8f8f0c31f79e22"
+    },
+    {
+      "path": "src/applebridge/schema_data/v1/request.v1.json",
+      "sha256": "445e6bf742661564e09f1919e08c5a648173acab8589f6d23ede22addb500719"
+    },
+    {
+      "path": "src/applebridge/schema_data/v1/result.v1.json",
+      "sha256": "03a4a6e5067258e556aa43244604573e66097c00cb2517e0dcb1d522fa41b820"
+    },
+    {
+      "path": "src/applebridge/schemas.py",
+      "sha256": "3a6bb7ecda206192d6cf5a079a540161837167d602820128a08538d454e8c08a"
+    },
+    {
+      "path": "src/applebridge.egg-info/dependency_links.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "src/applebridge.egg-info/entry_points.txt",
+      "sha256": "6beb917fde4b763ae8ccfe6fa22bad851e637bf48db0e7d4049ab9f93428daf2"
+    },
+    {
+      "path": "src/applebridge.egg-info/PKG-INFO",
+      "sha256": "c39900bff3e5b9111ae7b5d4c5bd72e6108631bbd19bb55b719489dc30c8db9b"
+    },
+    {
+      "path": "src/applebridge.egg-info/requires.txt",
+      "sha256": "f5a4bafdfd9d4e3ff876fd1c3544562c5a926e817d38df4243330586b36699d5"
+    },
+    {
+      "path": "src/applebridge.egg-info/SOURCES.txt",
+      "sha256": "55a11605376264ace54b3e44405c3f7ad69372db0de9a82308ba7cb68e0d1d82"
+    },
+    {
+      "path": "src/applebridge.egg-info/top_level.txt",
+      "sha256": "eee12961f67b726cce6c48a3b5f55f4bed2dac1b71ff6743a32dfa31e561ea76"
+    },
+    {
+      "path": "tests/conftest.py",
+      "sha256": "fdaed82b7badce795e5d6a34c34a0a4fd00813bd94a0d45b6fbc22bcdcd31231"
+    },
+    {
+      "path": "tests/test_cli.py",
+      "sha256": "8510ea7f965d55c62d3fee6fc976ad756129872fa58d82b206591a2509fee0c5"
+    },
+    {
+      "path": "tests/test_device_report.py",
+      "sha256": "55082071ba1e3d49c4679450add64e5c86a2e3ebf9cc339c12dba434d6d77f0c"
+    },
+    {
+      "path": "tests/test_mock_provider.py",
+      "sha256": "fe045f0eb18c8e85794d571d03e7e0eee81d615e95b5c2eec8b277a2d8c7625e"
+    },
+    {
+      "path": "tests/test_parsers.py",
+      "sha256": "c84fb9d775e4a7be9ee2a104e86c66a003a244a4114ae2669678ceca72432e00"
+    },
+    {
+      "path": "tests/test_receipts_redact.py",
+      "sha256": "2f39bee38b2e34de2de91ab0c63c3055369770d98d81d6448047f047d2c34ab0"
+    },
+    {
+      "path": "tests/test_schemas.py",
+      "sha256": "696df7789a7f8fa5d3dadb16b08bda580e18629ece8e8ea0b229d5eee870d0be"
+    },
+    {
+      "path": "tests/test_verify.py",
+      "sha256": "1a03c6dd4ecc727f7653fe24ec73d2480de8fddd747c01c07d432b54ddabe3e0"
+    }
+  ]
+}

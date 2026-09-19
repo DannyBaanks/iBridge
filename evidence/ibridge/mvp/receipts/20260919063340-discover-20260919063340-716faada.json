@@ -1,0 +1,43 @@
+{
+  "schema": "ibridge.receipt.v1",
+  "operation_id": "discover-20260919063340-716faada",
+  "ibridge_version": "0.1.0",
+  "host_alias": "fb386f331eaaded1",
+  "device_alias": null,
+  "device": null,
+  "capability": "discovery",
+  "authority": {
+    "requested": [
+      "discovery"
+    ],
+    "allowed": [
+      "discovery"
+    ],
+    "denied": []
+  },
+  "input": {
+    "pack_sha256": null,
+    "receiver_url": "",
+    "arguments": [
+      "discover"
+    ]
+  },
+  "transport": {
+    "usbmuxd": false,
+    "receiver": false,
+    "detail": "usbmuxd unreachable: Socket(Os { code: 10061, kind: ConnectionRefused, message: \"No se puede establecer una conexión ya que el equipo de destino denegó expresamente dicha conexión.\" })"
+  },
+  "started_at": "2026-09-19T06:33:40Z",
+  "finished_at": "2026-09-19T06:33:42Z",
+  "execution_result": "devices_enumerated:0",
+  "evidence_verdict": null,
+  "evidence": [
+    {
+      "role": "discover_output",
+      "path": "evidence/ibridge/mvp\\discover-20260919063340.json",
+      "sha256": "060a5185fdc6857842ec84f65025b0d659ac5a98ecda52626eb4eb61d6510b0a"
+    }
+  ],
+  "verdict": "ERROR",
+  "notes": []
+}

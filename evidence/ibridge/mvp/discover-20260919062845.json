@@ -1,0 +1,10 @@
+{
+  "schema": "ibridge.device.v1",
+  "observedAt": "2026-09-19T06:28:45Z",
+  "host_alias": "fb386f331eaaded1",
+  "devices": [],
+  "usbmuxd": {
+    "reachable": true,
+    "detail": "0 device(s) enumerated via usbmuxd"
+  }
+}
