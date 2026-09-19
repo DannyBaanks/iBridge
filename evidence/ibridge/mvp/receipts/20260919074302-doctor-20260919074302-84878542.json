@@ -1,0 +1,62 @@
+{
+  "schema": "ibridge.receipt.v1",
+  "operation_id": "doctor-20260919074302-84878542",
+  "ibridge_version": "0.1.0",
+  "host_alias": "fb386f331eaaded1",
+  "device_alias": "8531347d33c8dc18",
+  "device": {
+    "device_alias": "8531347d33c8dc18",
+    "model_class": "iPhone13,2",
+    "ios_version": "18.7.8",
+    "connection_type": "usb"
+  },
+  "capability": "doctor_orchestration",
+  "authority": {
+    "requested": [
+      "doctor_orchestration"
+    ],
+    "allowed": [
+      "doctor_orchestration"
+    ],
+    "denied": []
+  },
+  "input": {
+    "pack_sha256": "f885ee352f4944b6f2635b22fe1d9909be425bf7e84827fedac820b66968774a",
+    "receiver_url": "http://127.0.0.1:8377",
+    "arguments": [
+      "doctor",
+      "--bind-report",
+      "C:\\Development\\ISyCo Git\\AppleBridge\\device-evidence\\20260918T235012Z-8cd57985\\report.json"
+    ]
+  },
+  "transport": {
+    "usbmuxd": true,
+    "receiver": true,
+    "detail": "1 device(s) enumerated via usbmuxd"
+  },
+  "started_at": "2026-09-19T07:43:02Z",
+  "finished_at": "2026-09-19T07:43:02Z",
+  "execution_result": "bound_report:HISTORICAL",
+  "evidence_verdict": {
+    "classification": "HISTORICAL",
+    "report_sha256": "8cd579851bd9d5a3c68c83f86531680b3855efa073ac327b97a0c429cddb3450",
+    "report_generated_at": "2026-09-18T23:50:14Z",
+    "consistency_ios_version_match": true,
+    "report_summary": {
+      "fail": 0,
+      "not_demonstrated": 1,
+      "pass": 7,
+      "requires_macos_xcode": 0,
+      "verdict": "PARTIAL"
+    }
+  },
+  "evidence": [
+    {
+      "role": "device_report",
+      "path": "C:\\Development\\ISyCo Git\\AppleBridge\\device-evidence\\20260918T235012Z-8cd57985\\report.json",
+      "sha256": "8cd579851bd9d5a3c68c83f86531680b3855efa073ac327b97a0c429cddb3450"
+    }
+  ],
+  "verdict": "PARTIAL",
+  "notes": []
+}

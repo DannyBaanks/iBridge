@@ -1,0 +1,49 @@
+{
+  "schema": "ibridge.receipt.v1",
+  "operation_id": "discover-20260919074126-678fb541",
+  "ibridge_version": "0.1.0",
+  "host_alias": "fb386f331eaaded1",
+  "device_alias": "8531347d33c8dc18",
+  "device": {
+    "device_alias": "8531347d33c8dc18",
+    "model_class": "iPhone13,2",
+    "ios_version": "18.7.8",
+    "connection_type": "usb"
+  },
+  "capability": "discovery",
+  "authority": {
+    "requested": [
+      "discovery"
+    ],
+    "allowed": [
+      "discovery"
+    ],
+    "denied": []
+  },
+  "input": {
+    "pack_sha256": null,
+    "receiver_url": "",
+    "arguments": [
+      "discover",
+      "--human"
+    ]
+  },
+  "transport": {
+    "usbmuxd": true,
+    "receiver": false,
+    "detail": "1 device(s) enumerated via usbmuxd"
+  },
+  "started_at": "2026-09-19T07:41:26Z",
+  "finished_at": "2026-09-19T07:41:26Z",
+  "execution_result": "devices_enumerated:1",
+  "evidence_verdict": null,
+  "evidence": [
+    {
+      "role": "discover_output",
+      "path": "evidence/ibridge/mvp\\discover-20260919074126.json",
+      "sha256": "08d78abd7e30ebf276f8add5862ce8958fc829d84b114cae86341d6b2d75c426"
+    }
+  ],
+  "verdict": "PASS",
+  "notes": []
+}

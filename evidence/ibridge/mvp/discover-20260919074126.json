@@ -1,0 +1,28 @@
+{
+  "schema": "ibridge.device.v1",
+  "observedAt": "2026-09-19T07:41:26Z",
+  "host_alias": "fb386f331eaaded1",
+  "devices": [
+    {
+      "schema_version": 1,
+      "device_alias": "8531347d33c8dc18",
+      "stable_device_identifier": "8531347d33c8dc18",
+      "model": "iPhone13,2",
+      "architecture": "arm64",
+      "iosVersion": "18.7.8",
+      "connectionType": "usb",
+      "capabilities": [
+        "discovery",
+        "read_only_diagnostic",
+        "transport",
+        "doctor_orchestration"
+      ],
+      "observedAt": "2026-09-19T07:41:26Z",
+      "diagnostic": null
+    }
+  ],
+  "usbmuxd": {
+    "reachable": true,
+    "detail": "1 device(s) enumerated via usbmuxd"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "schema": "ibridge.receipt.v1",
+  "operation_id": "doctor-20260919074622-3bf6a863",
+  "ibridge_version": "0.1.0",
+  "host_alias": "fb386f331eaaded1",
+  "device_alias": "8531347d33c8dc18",
+  "device": {
+    "device_alias": "8531347d33c8dc18",
+    "model_class": "iPhone13,2",
+    "ios_version": "18.7.8",
+    "connection_type": "usb"
+  },
+  "capability": "doctor_orchestration",
+  "authority": {
+    "requested": [
+      "doctor_orchestration"
+    ],
+    "allowed": [
+      "doctor_orchestration"
+    ],
+    "denied": []
+  },
+  "input": {
+    "pack_sha256": "f885ee352f4944b6f2635b22fe1d9909be425bf7e84827fedac820b66968774a",
+    "receiver_url": "http://127.0.0.1:8377",
+    "arguments": [
+      "doctor",
+      "--wait",
+      "300"
+    ]
+  },
+  "transport": {
+    "usbmuxd": true,
+    "receiver": true,
+    "detail": "1 device(s) enumerated via usbmuxd"
+  },
+  "started_at": "2026-09-19T07:46:22Z",
+  "finished_at": "2026-09-19T07:51:23Z",
+  "execution_result": "no_report_bound: no_new_report_within_300_s",
+  "evidence_verdict": null,
+  "evidence": [],
+  "verdict": "NOT_DEMONSTRATED",
+  "notes": [
+    "no partial evidence was promoted to PASS"
+  ]
+}
