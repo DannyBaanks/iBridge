@@ -27,3 +27,6 @@ keys
 *.mobileprovision
 
 dockerfile
+# iBridge additions (host CLI crate)
+ibridge/target/
+ibridge/evidence/

@@ -1,0 +1,13 @@
+[package]
+name = "ibridge"
+version = "0.1.0"
+edition = "2021"
+description = "iBridge — physical iOS devices as explicit, observable capabilities for ISyCo-compatible hosts. Thin host CLI over iLoader-derived (idevice) machinery + AppleBridge protocol/evidence."
+license = "MIT"
+
+[dependencies]
+idevice = { version = "0.1.57", features = ["usbmuxd", "pair"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "time"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
