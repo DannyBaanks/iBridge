@@ -39,6 +39,8 @@ https://github.com/DannyBaanks/applebridge-probe (git, clean).
 ## Provenance gap (recorded, not silently repaired)
 
 `C:\Development\ISyCo Git\AppleBridge` is **not a git repository** — it cannot
-be forked/linked from iBridge code. Phase 3 decision needed: (a) init git
-history there, (b) publish to DannyBaanks, or (c) treat as vendored artifact.
-No action taken (execution discipline: no unrelated repairs).
+be forked/linked from iBridge code. MVP resolution (executed): the exact
+consumed material is fingerprinted in
+`evidence/applebridge_provenance_snapshot.json` (135 files, tree sha256
+`3abe4b37…`, narrative in `docs/APPLEBRIDGE_PROVENANCE_SNAPSHOT.md`).
+Future repository decision recommended separately; no action taken.

@@ -1,4 +1,8 @@
-# Integration Plan (Phases 3–9; NOT STARTED — awaiting Danny's approval)
+# Integration Plan (Phases 3–9)
+
+**STATUS: EXECUTED 2026-09-19 — see `docs/IBRIDGE_MVP_EVIDENCE.md` for the
+evidence and `docs/MULTI_DEVICE_FUTURE.md` for the Phase 9 design.**
+The plan below is the pre-execution draft, kept for provenance.
 
 ## Phase 3 — minimum iBridge contract (proposed, smallest)
 

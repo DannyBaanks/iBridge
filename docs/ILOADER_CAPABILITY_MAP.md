@@ -11,7 +11,7 @@ device never gains implicit execute authority.
 
 | capability | upstream evidence | failure modes (observed in code paths) | classification | authority / notes |
 |---|---|---|---|---|
-| device.discovery | `device.rs:list_devices()` via `idevice` crate `usbmuxd` feature; wireless via `core_device_proxy` | no device attached; usbmuxd service missing | REUSE | read-only; the natural `ibridge doctor` step 1 |
+| device.discovery | `device.rs:list_devices()` via `idevice` crate `usbmuxd` feature; wireless via `core_device_proxy` | no device attached; usbmuxd service missing | REUSE — **IMPLEMENTED in iBridge MVP** (usbmuxd reachability VERIFIED; binary-plist negotiation handled by the crate; env `USBMUXD_SOCKET_ADDRESS` respected for the initial connection) | read-only; the natural `ibridge doctor` step 1 |
 | device.identity | `DeviceInfo{name, id, u32 conn id, udid, connection_type, version}` | partial info on locked devices | ADAPT | receipts need a stable, minimal identity: salted-hash alias of UDID + iOS version (privacy decision → Phase 3) |
 | device.pair (USB) | `pairing.rs:generate_lockdown_plist`, `place_pairing_cmd`, `export_pairing_cmd`, `installed_pairing_apps` | pairing rejected on-device | REUSE | manual pairing = communication establishment; logged as evidence |
 | device.pair (wireless) | `pairing.rs:generate_rppairing`, `has_stored_rppairing`, `delete_stored_rppairing`; crate features `remote_pairing`, `tunnel_tcp_stack`, `xpc`, `rsd` | RP unsupported on old iOS | REUSE | wireless for modern devices; LOCAL OBSERVATION: Danny's install ran over this stack (works on this host) |

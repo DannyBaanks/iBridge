@@ -54,21 +54,31 @@ Two unrelated things are called "iloader":
    unexercised/stale. It is NOT this upstream. Not investigated further —
    OpencodeNative belongs to another work stream.
 
-## Modifications made by iBridge (this branch, Phase 0–2)
+## Modifications made by iBridge (branch `ibridge/integration`)
 
-- `docs/UPSTREAM_PROVENANCE.md` (this file)
-- `docs/ILOADER_CAPABILITY_MAP.md`
-- `docs/APPLEBRIDGE_CAPABILITY_MAP.md`
-- `docs/IBRIDGE_ARCHITECTURE.md`
-- `docs/INTEGRATION_PLAN.md`
-- No source, asset, branding, or build changes in Phases 0–2.
+**Phases 0–2 (commit fb2fff6)** — docs only:
+`docs/UPSTREAM_PROVENANCE.md`, `docs/ILOADER_CAPABILITY_MAP.md`,
+`docs/APPLEBRIDGE_CAPABILITY_MAP.md`, `docs/IBRIDGE_ARCHITECTURE.md`,
+`docs/INTEGRATION_PLAN.md`.
+
+**Phases 3–9 (MVP, 2026-09-19)** — new files only, no upstream source touched:
+- `ibridge/` — new standalone Rust crate (thin host CLI: status/discover/
+  doctor, authority, receipts, AppleBridge provider seam) using the same
+  `idevice` dependency family as upstream (resolved to 0.1.68 within the
+  semver range "0.1.57" — identical resolution upstream builds receive).
+  Upstream Tauri GUI, branding assets, and workflows remain byte-identical
+  (upstream README preserved verbatim at `docs/UPSTREAM_README.md`; root
+  README rewritten for iBridge with attribution).
+- `docs/RECEIPT_SCHEMA.md`, `docs/APPLEBRIDGE_PROVENANCE_SNAPSHOT.md`,
+  `docs/IBRIDGE_MVP_EVIDENCE.md`, `docs/MULTI_DEVICE_FUTURE.md`
+- `evidence/` — MVP run evidence + SHA256SUMS
 
 ## Components
 
-- **Retained (planned reuse, see capability maps)**: device
-  discovery/identity/pairing, USB + wireless transports, sideload/install
-  machinery (`idevice` + `isideload` crates), logging, secure storage.
-- **Replaced (conceptually, not yet)**: none yet — Phase 3+ may add an
-  `ibridge` host entry point alongside the GUI.
-- **Not used**: auto-updater plugin, release/download-count workflows,
-  marketing website assets.
+- **Retained (implemented)**: device discovery/identity over usbmuxd via the
+  `idevice` crate (read-only lockdown enrichment: ProductType/ProductVersion).
+- **Retained as documented seams (not wired into the CLI)**: pairing,
+  wireless RP transport, install/signing machinery (`isideload`), keyring.
+- **Replaced**: none.
+- **Not used**: auto-updater, release/download-count workflows, marketing
+  assets, GUI frontend changes.
