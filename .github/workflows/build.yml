@@ -220,8 +220,8 @@ jobs:
       - name: Init iOS Xcode project
         run: bun run tauri ios init
 
-      - name: Build iOS IPA
-        run: bun run tauri ios build --target aarch64
+      - name: Build iOS IPA (unsigned, for SideStore)
+        run: bun run tauri ios build --target aarch64 --no-sign
 
       - name: Upload iOS IPA
         uses: actions/upload-artifact@v7
