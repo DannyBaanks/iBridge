@@ -13,6 +13,7 @@ mod logging;
 pub mod mobile_bootstrap;
 mod mobile_runtime;
 mod operation;
+mod tunnel_control;
 
 use crate::{
     account::{
@@ -33,6 +34,7 @@ use crate::{
     },
     secure_storage::{force_disable_keyring, keyring_available},
     sideload::{SideloaderMutex, install_sidestore_operation, sideload_operation},
+    tunnel_control::{mobile_tunnel_start, mobile_tunnel_status, mobile_tunnel_stop},
 };
 use tauri::Manager;
 use tracing_subscriber::{Layer, Registry, fmt, layer::SubscriberExt, util::SubscriberInitExt};
@@ -47,6 +49,9 @@ pub fn run() {
 
     #[cfg(not(mobile))]
     let builder = builder.plugin(tauri_plugin_updater::Builder::new().build());
+
+    #[cfg(target_os = "ios")]
+    let builder = builder.plugin(tauri_plugin_ibridge_tunnel::init());
 
     builder
         .setup(|app| {
@@ -130,6 +135,9 @@ pub fn run() {
             mobile_runtime_status,
             mobile_sideload_operation,
             mobile_refresh_self_operation,
+            mobile_tunnel_start,
+            mobile_tunnel_status,
+            mobile_tunnel_stop,
             get_certificates,
             revoke_certificate,
             list_app_ids,
