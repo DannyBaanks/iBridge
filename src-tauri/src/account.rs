@@ -20,6 +20,7 @@ use tracing::debug;
 
 use crate::{
     error::AppError,
+    mobile_bootstrap::{MobileBootstrapAuth, MobileBootstrapAuthMutex},
     secure_storage::create_sideloading_storage,
     sideload::{SideloaderGuard, SideloaderMutex},
 };
@@ -29,14 +30,30 @@ pub async fn login_new(
     handle: AppHandle,
     window: Window,
     sideloader_state: State<'_, SideloaderMutex>,
+    mobile_auth_state: State<'_, MobileBootstrapAuthMutex>,
     email: String,
     password: String,
     anisette_server: String,
     save_credentials: bool,
 ) -> Result<(), AppError> {
-    let account = login(&handle, &window, &email, &password, anisette_server).await?;
+    let account = login(
+        &handle,
+        &window,
+        &email,
+        &password,
+        anisette_server.clone(),
+    )
+    .await?;
     let mut sideloader_guard = sideloader_state.lock().unwrap();
     *sideloader_guard = Some(account);
+    drop(sideloader_guard);
+
+    let mut mobile_auth_guard = mobile_auth_state.lock().unwrap();
+    *mobile_auth_guard = Some(MobileBootstrapAuth {
+        email: email.to_lowercase(),
+        anisette_server,
+    });
+    drop(mobile_auth_guard);
 
     if save_credentials {
         let pass_entry = Entry::new("iloader", &email).map_err(|e| {
@@ -73,6 +90,7 @@ pub async fn login_stored(
     email: String,
     anisette_server: String,
     sideloader_state: State<'_, SideloaderMutex>,
+    mobile_auth_state: State<'_, MobileBootstrapAuthMutex>,
 ) -> Result<(), AppError> {
     let pass_entry = Entry::new("iloader", &email).map_err(|e| {
         AppError::KeyringWithMessage(
@@ -83,9 +101,23 @@ pub async fn login_stored(
     let password = pass_entry.get_password().map_err(|e| {
         AppError::KeyringWithMessage("Failed to get credentials".to_string(), e.to_string())
     })?;
-    let account = login(&handle, &window, &email, &password, anisette_server).await?;
+    let account = login(
+        &handle,
+        &window,
+        &email,
+        &password,
+        anisette_server.clone(),
+    )
+    .await?;
     let mut sideloader_guard = sideloader_state.lock().unwrap();
     *sideloader_guard = Some(account);
+    drop(sideloader_guard);
+
+    let mut mobile_auth_guard = mobile_auth_state.lock().unwrap();
+    *mobile_auth_guard = Some(MobileBootstrapAuth {
+        email: email.to_lowercase(),
+        anisette_server,
+    });
 
     Ok(())
 }
@@ -125,9 +157,16 @@ pub fn logged_in_as(sideloader_state: State<'_, SideloaderMutex>) -> Option<Stri
 }
 
 #[tauri::command]
-pub fn invalidate_account(sideloader_state: State<'_, SideloaderMutex>) {
+pub fn invalidate_account(
+    sideloader_state: State<'_, SideloaderMutex>,
+    mobile_auth_state: State<'_, MobileBootstrapAuthMutex>,
+) {
     let mut sideloader_guard = sideloader_state.lock().unwrap();
     *sideloader_guard = None;
+    drop(sideloader_guard);
+
+    let mut mobile_auth_guard = mobile_auth_state.lock().unwrap();
+    *mobile_auth_guard = None;
 }
 
 #[tauri::command]
