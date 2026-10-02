@@ -1,9 +1,12 @@
 {
+  "$schema": "https://schema.tauri.app/config/2",
   "productName": "iBridge",
-  "identifier": "com.dannybaanks.ibridge.mobile",
+  "identifier": "me.dannybaanks.ibridge.mobile",
   "bundle": {
     "iOS": {
-      "minimumSystemVersion": "17.0"
+      "minimumSystemVersion": "17.0",
+      "frameworks": ["NetworkExtension"],
+      "template": "ios/project.yml.hbs"
     }
   }
 }
