@@ -7,6 +7,7 @@ import { open as openFileDialog } from "@tauri-apps/plugin-dialog";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import {
   sideloadOperation,
+  installIBridgeMobileOperation,
   installSideStoreOperation,
   installLiveContainerOperation,
   Operation,
@@ -214,7 +215,6 @@ function App() {
           <section className="workspace-section">
             <div className="section-header">
               <p className="section-label">{t("app.section_account")}</p>
-              {/* here to ensure spacing and stuff is correct */}
               <span className="section-hint placeholder" aria-hidden="true">
                 Placeholder
               </span>
@@ -305,6 +305,17 @@ function App() {
             </div>
             <GlassCard className="panel">
               <div className="action-row single-row">
+                <button
+                  onClick={() => {
+                    if (!ensuredLoggedIn() || !ensureSelectedDevice()) return;
+                    startOperation(installIBridgeMobileOperation, {}).catch((e) => {
+                      console.log(e.type);
+                      console.error(e.message);
+                    });
+                  }}
+                >
+                  {t("app.ibridge_mobile")}
+                </button>
                 <button
                   onClick={() => {
                     if (!ensuredLoggedIn() || !ensureSelectedDevice()) return;
