@@ -43,10 +43,25 @@ jobs:
         run: bun run build
 
       - name: Compile unsigned Tauri iOS app
+        shell: bash
         run: |
+          set -euo pipefail
           PROJECT=$(find src-tauri/gen/apple -maxdepth 1 -name '*.xcodeproj' -print -quit)
-          test -n "$PROJECT"
-          SCHEME=$(xcodebuild -project "$PROJECT" -list -json | python3 -c 'import json,sys; data=json.load(sys.stdin); print(data["project"]["schemes"][0])')
+          if [ -z "$PROJECT" ]; then
+            echo "Generated Xcode project not found" >&2
+            exit 1
+          fi
+
+          SCHEME=$(xcodebuild -project "$PROJECT" -list -json | python3 -c '
+          import json, sys
+          data = json.load(sys.stdin)
+          schemes = data.get("project", {}).get("schemes", [])
+          scheme = next((value for value in schemes if value.endswith("_iOS")), None)
+          if not scheme:
+              raise SystemExit("No generated iOS scheme found")
+          print(scheme)
+          ')
+
           mkdir -p mobile-ci/app
           xcodebuild \
             -project "$PROJECT" \
@@ -56,25 +71,42 @@ jobs:
             -destination 'generic/platform=iOS' \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
+            DEVELOPMENT_TEAM= \
+            ARCHS=arm64 \
+            ONLY_ACTIVE_ARCH=YES \
             CONFIGURATION_BUILD_DIR="$PWD/mobile-ci/app" \
             build
 
       - name: Package resignable IPA
+        shell: bash
         run: |
-          APP=$(find mobile-ci/app -maxdepth 1 -name '*.app' -print -quit)
-          test -n "$APP"
-          rm -rf mobile-ci/Payload
+          set -euo pipefail
+          APP=$(find mobile-ci/app -maxdepth 1 -type d -name '*.app' -print -quit)
+          if [ -z "$APP" ]; then
+            echo "Built iOS app not found" >&2
+            exit 1
+          fi
+
+          if [ ! -d "$APP/PlugIns/IBridgeTunnelProvider.appex" ]; then
+            echo "Embedded IBridgeTunnelProvider.appex not found" >&2
+            find "$APP" -maxdepth 3 -print
+            exit 1
+          fi
+
           mkdir -p mobile-ci/Payload
           cp -R "$APP" mobile-ci/Payload/iBridge.app
-          cd mobile-ci
-          zip -qry iBridge-Mobile.ipa Payload
-          test -s iBridge-Mobile.ipa
+          (
+            cd mobile-ci
+            zip -qry iBridge-Mobile.ipa Payload
+          )
+          test -s mobile-ci/iBridge-Mobile.ipa
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v7
         with:
           name: iBridge-Mobile
           path: mobile-ci/iBridge-Mobile.ipa
+          if-no-files-found: error
 
       - name: Attach IPA to release
         if: github.event_name == 'release'
