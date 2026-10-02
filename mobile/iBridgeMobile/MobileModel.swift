@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 @MainActor
 final class MobileModel: ObservableObject {
@@ -16,9 +17,9 @@ final class MobileModel: ObservableObject {
         do {
             try BootstrapImporter.importIfPresent()
             configuration = MobileConfiguration.load()
-            needsCredential = KeychainStore.string(account: "applePassword") == nil
+            needsCredential = KeychainStore.string(account: BootstrapImporter.passwordAccount) == nil
             status = configuration == nil
-                ? "Instala iBridge desde iLoader Desktop una vez para completar el pairing."
+                ? "Instala iBridge desde iBridge Desktop una vez para completar el pairing."
                 : "Listo para firmar."
         } catch {
             status = "Bootstrap falló: \(error.localizedDescription)"
@@ -31,7 +32,7 @@ final class MobileModel: ObservableObject {
             return
         }
         do {
-            try KeychainStore.setString(value, account: "applePassword")
+            try KeychainStore.setString(value, account: BootstrapImporter.passwordAccount)
             needsCredential = false
             status = "Cuenta guardada en Keychain."
         } catch {
@@ -84,17 +85,17 @@ final class MobileModel: ObservableObject {
             status = "Falta el bootstrap del iPhone."
             return
         }
-        guard KeychainStore.string(account: "applePassword") != nil else {
+        guard KeychainStore.string(account: BootstrapImporter.passwordAccount) != nil else {
             needsCredential = true
-            status = "Conecta tu Apple ID una vez."
+            status = "Vuelve a conectar tu Apple ID."
             return
         }
-        guard let pairing = KeychainStore.data(account: "devicePairing") else {
+        guard let pairing = KeychainStore.data(account: BootstrapImporter.pairingAccount) else {
             status = "Falta el pairing. Reinstala iBridge desde Desktop."
             return
         }
         guard let address = DeviceAddress.current() else {
-            status = "No encontré una interfaz local para este iPhone."
+            status = "Activa LocalDevVPN para que iBridge pueda hablar con este iPhone."
             return
         }
 
