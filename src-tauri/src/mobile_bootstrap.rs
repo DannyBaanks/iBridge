@@ -3,7 +3,7 @@ use std::sync::Mutex;
 use chrono::Utc;
 use idevice::{IdeviceService, installation_proxy::InstallationProxyClient};
 use isideload::dev::app_ids::AppIdsApi;
-use plist_macro::plist;
+use plist::Dictionary;
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Manager, State, Window};
 
@@ -127,9 +127,8 @@ async fn prepare_mobile_app_ids(sideloader_state: &SideloaderMutex) -> Result<()
             .unwrap_or(false);
 
         if !network_extension_enabled {
-            let features = plist!(dict {
-                NETWORK_EXTENSION_FEATURE => true,
-            });
+            let mut features = Dictionary::new();
+            features.insert(NETWORK_EXTENSION_FEATURE.to_string(), true.into());
             app_id = dev_session
                 .update_app_id(&team, &app_id, features, None)
                 .await?;
