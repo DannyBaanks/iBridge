@@ -20,7 +20,7 @@ use crate::{
     sideload::{SideloaderGuard, SideloaderMutex, download},
 };
 
-pub const MOBILE_TUNNEL_FALLBACK_IP: &str = "10.7.0.1";
+pub const MOBILE_TUNNEL_HOST_IP: &str = "10.7.0.1";
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -38,83 +38,6 @@ fn document_path(handle: &AppHandle, relative: &str) -> Result<PathBuf, AppError
         .map(|root| root.join(relative))
 }
 
-fn tunnel_host() -> String {
-    #[cfg(any(target_os = "ios", target_os = "macos"))]
-    if let Some(host) = discover_point_to_point_peer() {
-        return host;
-    }
-
-    MOBILE_TUNNEL_FALLBACK_IP.to_string()
-}
-
-#[cfg(any(target_os = "ios", target_os = "macos"))]
-fn discover_point_to_point_peer() -> Option<String> {
-    use std::{ffi::CStr, ptr};
-
-    unsafe {
-        let mut interfaces: *mut libc::ifaddrs = ptr::null_mut();
-        if libc::getifaddrs(&mut interfaces) != 0 || interfaces.is_null() {
-            return None;
-        }
-
-        struct Guard(*mut libc::ifaddrs);
-        impl Drop for Guard {
-            fn drop(&mut self) {
-                unsafe { libc::freeifaddrs(self.0) };
-            }
-        }
-        let _guard = Guard(interfaces);
-
-        let mut current = interfaces;
-        while !current.is_null() {
-            let interface = &*current;
-            current = interface.ifa_next;
-
-            let flags = interface.ifa_flags as i32;
-            if flags & libc::IFF_UP == 0 || flags & libc::IFF_POINTOPOINT == 0 {
-                continue;
-            }
-            if interface.ifa_dstaddr.is_null() {
-                continue;
-            }
-
-            let name = CStr::from_ptr(interface.ifa_name).to_string_lossy();
-            if !name.starts_with("utun") {
-                continue;
-            }
-
-            let address = interface.ifa_dstaddr;
-            let family = (*address).sa_family as i32;
-            let length = match family {
-                libc::AF_INET => std::mem::size_of::<libc::sockaddr_in>() as libc::socklen_t,
-                libc::AF_INET6 => std::mem::size_of::<libc::sockaddr_in6>() as libc::socklen_t,
-                _ => continue,
-            };
-
-            let mut host = [0_i8; libc::NI_MAXHOST as usize];
-            if libc::getnameinfo(
-                address,
-                length,
-                host.as_mut_ptr(),
-                host.len() as libc::socklen_t,
-                ptr::null_mut(),
-                0,
-                libc::NI_NUMERICHOST,
-            ) != 0
-            {
-                continue;
-            }
-
-            let value = CStr::from_ptr(host.as_ptr()).to_string_lossy().into_owned();
-            if value != "0.0.0.0" && value != "::" && !value.is_empty() {
-                return Some(value);
-            }
-        }
-    }
-
-    None
-}
-
 fn mobile_provider(handle: &AppHandle) -> Result<TcpProvider, AppError> {
     let pairing_path = document_path(handle, MOBILE_PAIRING_PATH)?;
     let pairing_bytes = std::fs::read(&pairing_path).map_err(|e| {
@@ -125,9 +48,8 @@ fn mobile_provider(handle: &AppHandle) -> Result<TcpProvider, AppError> {
     })?;
     let pairing_file = PairingFile::from_bytes(&pairing_bytes)
         .map_err(|e| AppError::LockdownPairing("Failed to parse mobile pairing bootstrap".into(), e.to_string()))?;
-    let tunnel_host = tunnel_host();
-    let addr = IpAddr::from_str(&tunnel_host)
-        .map_err(|e| AppError::Misc(format!("Invalid mobile tunnel address {tunnel_host}: {e}")))?;
+    let addr = IpAddr::from_str(MOBILE_TUNNEL_HOST_IP)
+        .map_err(|e| AppError::Misc(format!("Invalid mobile tunnel address: {e}")))?;
 
     Ok(TcpProvider {
         addr,
@@ -206,12 +128,11 @@ pub async fn mobile_restore_bootstrap_account(
 #[tauri::command]
 pub async fn mobile_runtime_status(handle: AppHandle) -> Result<MobileRuntimeStatus, AppError> {
     let pairing_ready = document_path(&handle, MOBILE_PAIRING_PATH)?.is_file();
-    let host = tunnel_host();
     if !pairing_ready {
         return Ok(MobileRuntimeStatus {
             pairing_ready: false,
             tunnel_reachable: false,
-            tunnel_host: host,
+            tunnel_host: MOBILE_TUNNEL_HOST_IP.to_string(),
         });
     }
 
@@ -221,7 +142,7 @@ pub async fn mobile_runtime_status(handle: AppHandle) -> Result<MobileRuntimeSta
     Ok(MobileRuntimeStatus {
         pairing_ready,
         tunnel_reachable,
-        tunnel_host: host,
+        tunnel_host: MOBILE_TUNNEL_HOST_IP.to_string(),
     })
 }
 
