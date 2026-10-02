@@ -218,13 +218,13 @@ jobs:
         run: bun i --frozen-lockfile
 
       - name: Build iOS IPA
-        run: bun run tauri ios build --target aarch64-apple-ios
+        run: bun run tauri ios build --target aarch64
 
       - name: Upload iOS IPA
         uses: actions/upload-artifact@v7
         with:
           name: ios-ipa
-          path: ${{ github.workspace }}/src-tauri/target/aarch64-apple-ios/release/bundle/**/*.ipa
+          path: ${{ github.workspace }}/src-tauri/target/aarch64/release/bundle/**/*.ipa
 
   mark-latest:
     needs: build
