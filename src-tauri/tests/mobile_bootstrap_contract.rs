@@ -16,9 +16,9 @@ fn mobile_release_contract_points_to_ibridge_asset() {
 
 #[test]
 fn mobile_bundle_match_survives_team_suffix_added_by_isideload() {
-    assert!(is_ibridge_mobile_bundle_id("me.dannybaanks.ibridge.mobile"));
+    assert!(is_ibridge_mobile_bundle_id("com.dannybaanks.ibridge.mobile"));
     assert!(is_ibridge_mobile_bundle_id(
-        "me.dannybaanks.ibridge.mobile.A1B2C3D4E5"
+        "com.dannybaanks.ibridge.mobile.A1B2C3D4E5"
     ));
     assert!(!is_ibridge_mobile_bundle_id("com.SideStore.SideStore"));
 }
