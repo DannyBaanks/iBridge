@@ -1,6 +1,6 @@
 name: iBridgeMobile
 options:
-  bundleIdPrefix: com.dannybaanks.ibridge
+  bundleIdPrefix: me.dannybaanks.ibridge
   deploymentTarget:
     iOS: "17.0"
 settings:
@@ -17,7 +17,7 @@ targets:
       path: iBridgeMobile/Info.plist
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.dannybaanks.ibridge.mobile
+        PRODUCT_BUNDLE_IDENTIFIER: me.dannybaanks.ibridge.mobile
         PRODUCT_NAME: iBridge
         SWIFT_OBJC_BRIDGING_HEADER: iBridgeMobile/BridgingHeader.h
         LIBRARY_SEARCH_PATHS: "$(inherited) $(SRCROOT)/build"
