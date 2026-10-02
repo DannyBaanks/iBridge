@@ -22,11 +22,13 @@ use isideload::{
 use rootcause::prelude::*;
 use serde::{Deserialize, Serialize};
 
+const KEYCHAIN_SERVICE: &str = "com.dannybaanks.ibridge.mobile";
+const KEYCHAIN_ACCOUNT: &str = "applePassword";
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct SignInstallRequest {
     apple_id: String,
-    password: String,
     verification_code: Option<String>,
     anisette_server: String,
     input_ipa: String,
@@ -110,12 +112,13 @@ impl SideloadingStorage for DirectoryStorage {
     }
 }
 
-fn noop_progress(_: f32) -> std::future::Ready<()> {
-    std::future::ready(())
-}
-
 async fn sign_and_install(request: SignInstallRequest) -> Result<(), CoreFailure> {
     let _ = isideload::init();
+
+    let credential = keyring::Entry::new(KEYCHAIN_SERVICE, KEYCHAIN_ACCOUNT)
+        .map_err(|error| CoreFailure::new("keychain_error", error.to_string()))?
+        .get_password()
+        .map_err(|error| CoreFailure::new("credential_missing", error.to_string()))?;
 
     let storage_root = PathBuf::from(&request.storage_dir);
     let tfa_requested = Arc::new(AtomicBool::new(false));
@@ -152,7 +155,7 @@ async fn sign_and_install(request: SignInstallRequest) -> Result<(), CoreFailure
 
     let login_result = AppleAccount::builder(&request.apple_id.to_lowercase())
         .anisette_provider(anisette)
-        .login(&request.password, Box::new(tfa_callback))
+        .login(&credential, Box::new(tfa_callback))
         .await;
 
     let mut account = match login_result {
