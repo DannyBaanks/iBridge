@@ -1,6 +1,6 @@
 use iloader_lib::mobile_bootstrap::{
-    MobileBootstrapPayload, MOBILE_BOOTSTRAP_PATH, MOBILE_PAIRING_PATH, MOBILE_RELEASE_URL,
-    MOBILE_SECRET_PATH, is_ibridge_mobile_bundle_id,
+    MOBILE_BOOTSTRAP_PATH, MOBILE_PAIRING_PATH, MOBILE_RELEASE_URL, MOBILE_SECRET_PATH,
+    MobileBootstrapPayload, is_ibridge_mobile_bundle_id,
 };
 
 #[test]
@@ -16,7 +16,9 @@ fn mobile_release_contract_points_to_ibridge_asset() {
 
 #[test]
 fn mobile_bundle_match_survives_team_suffix_added_by_isideload() {
-    assert!(is_ibridge_mobile_bundle_id("com.dannybaanks.ibridge.mobile"));
+    assert!(is_ibridge_mobile_bundle_id(
+        "com.dannybaanks.ibridge.mobile"
+    ));
     assert!(is_ibridge_mobile_bundle_id(
         "com.dannybaanks.ibridge.mobile.A1B2C3D4E5"
     ));

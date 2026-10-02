@@ -36,14 +36,7 @@ pub async fn login_new(
     anisette_server: String,
     save_credentials: bool,
 ) -> Result<(), AppError> {
-    let account = login(
-        &handle,
-        &window,
-        &email,
-        &password,
-        anisette_server.clone(),
-    )
-    .await?;
+    let account = login(&handle, &window, &email, &password, anisette_server.clone()).await?;
     let mut sideloader_guard = sideloader_state.lock().unwrap();
     *sideloader_guard = Some(account);
     drop(sideloader_guard);
@@ -102,14 +95,7 @@ pub async fn login_stored(
     let password = pass_entry.get_password().map_err(|e| {
         AppError::KeyringWithMessage("Failed to get credentials".to_string(), e.to_string())
     })?;
-    let account = login(
-        &handle,
-        &window,
-        &email,
-        &password,
-        anisette_server.clone(),
-    )
-    .await?;
+    let account = login(&handle, &window, &email, &password, anisette_server.clone()).await?;
     let mut sideloader_guard = sideloader_state.lock().unwrap();
     *sideloader_guard = Some(account);
     drop(sideloader_guard);
@@ -202,7 +188,7 @@ async fn login(
     email: &str,
     password: &str,
     anisette_server: String,
-) -> Result<Sideloader<MaxCertsCallbackBox>, AppError> {
+) -> Result<Sideloader, AppError> {
     let tfa_closure = {
         let window_clone = window.clone();
         move |params: TwoFactorCallbackParams| {
@@ -251,32 +237,34 @@ async fn login(
 
     debug!("Created developer session");
 
-    let max_certs_callback: MaxCertsCallbackBox = Box::new(move |certs: Vec<DevelopmentCertificate>| {
-        let window_clone = window.clone();
-        Box::pin(async move {
-            let cert_infos: Vec<CertificateInfo> = certs
-                .iter()
-                .map(|cert| CertificateInfo {
-                    name: cert.name.clone(),
-                    certificate_id: cert.certificate_id.clone(),
-                    serial_number: cert.serial_number.clone(),
-                    machine_name: cert.machine_name.clone(),
-                    machine_id: cert.machine_id.clone(),
-                })
-                .collect();
-            window_clone.emit("max-certs-reached", cert_infos)?;
+    let max_certs_window = window.clone();
+    let max_certs_callback = Box::new(move |certs: &Vec<DevelopmentCertificate>| {
+        let window_clone = max_certs_window.clone();
+        let cert_infos: Vec<CertificateInfo> = certs
+            .iter()
+            .map(|cert| CertificateInfo {
+                name: cert.name.clone(),
+                certificate_id: cert.certificate_id.clone(),
+                serial_number: cert.serial_number.clone(),
+                machine_name: cert.machine_name.clone(),
+                machine_id: cert.machine_id.clone(),
+            })
+            .collect();
+        if let Err(error) = window_clone.emit("max-certs-reached", cert_infos) {
+            debug!("Failed to show certificate selection: {error}");
+            return None;
+        }
 
-            let (tx, rx) = std::sync::mpsc::channel::<Option<Vec<String>>>();
-            let handler_id = window_clone.listen("max-certs-response", move |event| {
-                let certs = event.payload();
-                let certs = serde_json::from_str::<Option<Vec<String>>>(certs).unwrap_or(None);
-                let _ = tx.send(certs);
-            });
+        let (tx, rx) = std::sync::mpsc::channel::<Option<Vec<String>>>();
+        let handler_id = window_clone.listen("max-certs-response", move |event| {
+            let certs =
+                serde_json::from_str::<Option<Vec<String>>>(event.payload()).unwrap_or(None);
+            let _ = tx.send(certs);
+        });
 
-            let result = rx.recv_timeout(Duration::from_secs(300));
-            window_clone.unlisten(handler_id);
-            Ok(result?)
-        })
+        let result = rx.recv_timeout(Duration::from_secs(300)).ok().flatten();
+        window_clone.unlisten(handler_id);
+        result
     });
 
     // TODO: Team Selection

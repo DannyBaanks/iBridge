@@ -151,14 +151,15 @@ async fn prepare_mobile_app_ids(sideloader_state: &SideloaderMutex) -> Result<()
 
 async fn installed_mobile_bundle_id(device: &DeviceInfo) -> Result<String, AppError> {
     let provider = get_provider(device).await?;
-    let mut installation_proxy = InstallationProxyClient::connect(&provider)
-        .await
-        .map_err(|e| {
-            AppError::DeviceComsWithMessage(
-                "Failed to connect to installation proxy".into(),
-                e.to_string(),
-            )
-        })?;
+    let mut installation_proxy =
+        InstallationProxyClient::connect(&provider)
+            .await
+            .map_err(|e| {
+                AppError::DeviceComsWithMessage(
+                    "Failed to connect to installation proxy".into(),
+                    e.to_string(),
+                )
+            })?;
 
     let installed_apps = installation_proxy
         .get_apps(Some("User"), None)
@@ -207,8 +208,8 @@ pub async fn install_ibridge_mobile_operation(
     };
 
     op.start("download")?;
-    let mobile_ipa_url = std::env::var("IBRIDGE_MOBILE_IPA_URL")
-        .unwrap_or_else(|_| MOBILE_RELEASE_URL.to_string());
+    let mobile_ipa_url =
+        std::env::var("IBRIDGE_MOBILE_IPA_URL").unwrap_or_else(|_| MOBILE_RELEASE_URL.to_string());
     let destination = handle
         .path()
         .temp_dir()
@@ -217,10 +218,7 @@ pub async fn install_ibridge_mobile_operation(
     op.fail_if_err("download", download(&mobile_ipa_url, &destination).await)?;
 
     op.move_on("download", "install")?;
-    op.fail_if_err(
-        "install",
-        prepare_mobile_app_ids(&sideloader_state).await,
-    )?;
+    op.fail_if_err("install", prepare_mobile_app_ids(&sideloader_state).await)?;
     op.fail_if_err(
         "install",
         sideload(
@@ -273,13 +271,7 @@ pub async fn install_ibridge_mobile_operation(
 
     op.fail_if_err(
         "bootstrap",
-        place_file(
-            secret,
-            &provider,
-            bundle_id,
-            MOBILE_SECRET_PATH.to_string(),
-        )
-        .await,
+        place_file(secret, &provider, bundle_id, MOBILE_SECRET_PATH.to_string()).await,
     )?;
 
     op.complete("bootstrap")?;

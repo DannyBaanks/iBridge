@@ -6,7 +6,7 @@
     "iOS": {
       "minimumSystemVersion": "17.0",
       "frameworks": ["NetworkExtension"],
-      "template": "ios/project.yml.hbs"
+      "template": "src-tauri/ios/project.yml.hbs"
     }
   }
 }

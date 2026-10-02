@@ -1,10 +1,7 @@
 use std::{net::IpAddr, path::PathBuf, str::FromStr};
 
 use idevice::{
-    IdeviceService,
-    lockdown::LockdownClient,
-    pairing_file::PairingFile,
-    provider::TcpProvider,
+    IdeviceService, lockdown::LockdownClient, pairing_file::PairingFile, provider::TcpProvider,
 };
 use serde::Serialize;
 use tauri::{AppHandle, Manager, State, Window};
@@ -34,7 +31,12 @@ fn document_path(handle: &AppHandle, relative: &str) -> Result<PathBuf, AppError
     handle
         .path()
         .document_dir()
-        .map_err(|e| AppError::Filesystem("Failed to get app Documents directory".into(), e.to_string()))
+        .map_err(|e| {
+            AppError::Filesystem(
+                "Failed to get app Documents directory".into(),
+                e.to_string(),
+            )
+        })
         .map(|root| root.join(relative))
 }
 
@@ -46,8 +48,12 @@ fn mobile_provider(handle: &AppHandle) -> Result<TcpProvider, AppError> {
             format!("{}: {e}", pairing_path.display()),
         )
     })?;
-    let pairing_file = PairingFile::from_bytes(&pairing_bytes)
-        .map_err(|e| AppError::LockdownPairing("Failed to parse mobile pairing bootstrap".into(), e.to_string()))?;
+    let pairing_file = PairingFile::from_bytes(&pairing_bytes).map_err(|e| {
+        AppError::LockdownPairing(
+            "Failed to parse mobile pairing bootstrap".into(),
+            e.to_string(),
+        )
+    })?;
     let addr = IpAddr::from_str(MOBILE_TUNNEL_HOST_IP)
         .map_err(|e| AppError::Misc(format!("Invalid mobile tunnel address: {e}")))?;
 
@@ -191,8 +197,8 @@ pub async fn mobile_refresh_self_operation(
     let op = Operation::new("mobile_refresh_self".to_string(), &window);
     op.start("download")?;
 
-    let source = std::env::var("IBRIDGE_MOBILE_IPA_URL")
-        .unwrap_or_else(|_| MOBILE_RELEASE_URL.to_string());
+    let source =
+        std::env::var("IBRIDGE_MOBILE_IPA_URL").unwrap_or_else(|_| MOBILE_RELEASE_URL.to_string());
     let destination = handle
         .path()
         .temp_dir()

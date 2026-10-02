@@ -101,6 +101,7 @@ export default function MobileApp() {
             if (event.payload.updateType === "finished") {
               return { ...old, completed: [...old.completed, event.payload.stepId] };
             }
+            if (event.payload.updateType !== "failed") return old;
             return {
               ...old,
               failed: [
