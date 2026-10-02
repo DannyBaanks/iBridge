@@ -25,6 +25,7 @@ const MOBILE_RELEASE_FILENAME: &str = "iBridge-Mobile.ipa";
 #[derive(Clone)]
 pub struct MobileBootstrapAuth {
     pub email: String,
+    pub password: String,
     pub anisette_server: String,
 }
 
@@ -62,6 +63,24 @@ impl MobileBootstrapPayload {
             pairing_path: MOBILE_PAIRING_PATH,
             secret_path: MOBILE_SECRET_PATH,
             created_at: Utc::now().to_rfc3339(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MobileAccountSecret {
+    schema: &'static str,
+    apple_id: String,
+    password: String,
+}
+
+impl MobileAccountSecret {
+    pub fn new(apple_id: impl Into<String>, password: impl Into<String>) -> Self {
+        Self {
+            schema: "ibridge.mobile-account-secret/1",
+            apple_id: apple_id.into(),
+            password: password.into(),
         }
     }
 }
@@ -170,7 +189,7 @@ pub async fn install_ibridge_mobile_operation(
         device.info.udid,
         device.info.name,
         device.info.version,
-        auth.email,
+        auth.email.clone(),
         auth.anisette_server,
     );
     let payload = serde_json::to_vec(&payload)
@@ -181,8 +200,23 @@ pub async fn install_ibridge_mobile_operation(
         place_file(
             payload,
             &provider,
-            bundle_id,
+            bundle_id.clone(),
             MOBILE_BOOTSTRAP_PATH.to_string(),
+        )
+        .await,
+    )?;
+
+    let secret = MobileAccountSecret::new(auth.email, auth.password);
+    let secret = serde_json::to_vec(&secret)
+        .map_err(|e| AppError::Misc(format!("Failed to encode mobile account secret: {e}")))?;
+
+    op.fail_if_err(
+        "bootstrap",
+        place_file(
+            secret,
+            &provider,
+            bundle_id,
+            MOBILE_SECRET_PATH.to_string(),
         )
         .await,
     )?;
