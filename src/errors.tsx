@@ -45,6 +45,7 @@ export const errorSuggestionKeys = {
 } as const;
 
 export type ErrorVariant = keyof typeof errorSuggestionKeys;
+export type ErrorSuggestionPlatform = "mac" | "windows" | "linux" | "ios";
 
 export type AppError = {
   type: ErrorVariant;
@@ -69,7 +70,7 @@ const dedupeSuggestions = (suggestions: string[]) => {
 const getSuggestionBlock = (
   t: TFunction,
   key: string,
-  platform: "mac" | "windows" | "linux",
+  platform: ErrorSuggestionPlatform,
   anisetteServer: string,
 ) => {
   const rawSuggestions = t(key, {
@@ -117,7 +118,7 @@ const getSuggestionBlock = (
 export const getErrorSuggestions = (
   t: TFunction,
   type: ErrorVariant,
-  platform: "mac" | "windows" | "linux",
+  platform: ErrorSuggestionPlatform,
   anisetteServer: string,
 ): string[] => {
   return dedupeSuggestions(

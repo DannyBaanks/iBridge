@@ -1,0 +1,279 @@
+use std::sync::Mutex;
+
+use chrono::Utc;
+use idevice::{IdeviceService, installation_proxy::InstallationProxyClient};
+use isideload::dev::app_ids::AppIdsApi;
+use plist::Dictionary;
+use serde::{Deserialize, Serialize};
+use tauri::{AppHandle, Manager, State, Window};
+
+use crate::{
+    device::{DeviceInfo, DeviceInfoMutex, get_provider},
+    error::AppError,
+    operation::Operation,
+    pairing::place_file,
+    sideload::{SideloaderGuard, SideloaderMutex, download, sideload},
+};
+
+pub const MOBILE_RELEASE_URL: &str =
+    "https://github.com/DannyBaanks/iBridge/releases/latest/download/iBridge-Mobile.ipa";
+const MOBILE_DISPLAY_NAME: &str = "iBridge";
+pub const MOBILE_BUNDLE_PREFIX: &str = "com.dannybaanks.ibridge.mobile";
+pub const MOBILE_PAIRING_PATH: &str = "iBridgeBootstrap/pairing.plist";
+pub const MOBILE_BOOTSTRAP_PATH: &str = "iBridgeBootstrap/bootstrap.json";
+pub const MOBILE_SECRET_PATH: &str = "iBridgeBootstrap/account-secret.json";
+const MOBILE_RELEASE_FILENAME: &str = "iBridge-Mobile.ipa";
+const NETWORK_EXTENSION_FEATURE: &str = "NWEXT04537";
+
+#[derive(Clone)]
+pub struct MobileBootstrapAuth {
+    pub email: String,
+    pub password: String,
+    pub anisette_server: String,
+}
+
+pub type MobileBootstrapAuthMutex = Mutex<Option<MobileBootstrapAuth>>;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MobileBootstrapPayload {
+    pub(crate) schema: String,
+    pub(crate) device_udid: String,
+    pub(crate) device_name: String,
+    pub(crate) device_version: String,
+    pub(crate) apple_id: String,
+    pub(crate) anisette_server: String,
+    pub(crate) pairing_path: String,
+    pub(crate) secret_path: String,
+    pub(crate) created_at: String,
+}
+
+impl MobileBootstrapPayload {
+    pub fn new(
+        device_udid: impl Into<String>,
+        device_name: impl Into<String>,
+        device_version: impl Into<String>,
+        apple_id: impl Into<String>,
+        anisette_server: impl Into<String>,
+    ) -> Self {
+        Self {
+            schema: "ibridge.mobile-bootstrap/1".into(),
+            device_udid: device_udid.into(),
+            device_name: device_name.into(),
+            device_version: device_version.into(),
+            apple_id: apple_id.into(),
+            anisette_server: anisette_server.into(),
+            pairing_path: MOBILE_PAIRING_PATH.into(),
+            secret_path: MOBILE_SECRET_PATH.into(),
+            created_at: Utc::now().to_rfc3339(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MobileAccountSecret {
+    pub(crate) schema: String,
+    pub(crate) apple_id: String,
+    pub(crate) password: String,
+}
+
+impl MobileAccountSecret {
+    pub fn new(apple_id: impl Into<String>, password: impl Into<String>) -> Self {
+        Self {
+            schema: "ibridge.mobile-account-secret/1".into(),
+            apple_id: apple_id.into(),
+            password: password.into(),
+        }
+    }
+}
+
+pub fn is_ibridge_mobile_bundle_id(bundle_id: &str) -> bool {
+    bundle_id == MOBILE_BUNDLE_PREFIX
+        || bundle_id
+            .strip_prefix(MOBILE_BUNDLE_PREFIX)
+            .is_some_and(|suffix| suffix.starts_with('.'))
+}
+
+async fn prepare_mobile_app_ids(sideloader_state: &SideloaderMutex) -> Result<(), AppError> {
+    let mut sideloader = SideloaderGuard::take(sideloader_state)?;
+    let team = sideloader.get_mut().get_team().await?;
+    let dev_session = sideloader.get_mut().get_dev_session();
+    let existing = dev_session.list_app_ids(&team, None).await?.app_ids;
+
+    let main_bundle_id = format!("{}.{}", MOBILE_BUNDLE_PREFIX, team.team_id);
+    let tunnel_bundle_id = format!("{}.tunnel", main_bundle_id);
+
+    for (name, identifier) in [
+        ("iBridge Mobile", main_bundle_id),
+        ("iBridge Tunnel", tunnel_bundle_id),
+    ] {
+        let mut app_id = if let Some(found) = existing
+            .iter()
+            .find(|app_id| app_id.identifier == identifier)
+            .cloned()
+        {
+            found
+        } else {
+            dev_session
+                .add_app_id(&team, name, &identifier, None)
+                .await?
+        };
+
+        let network_extension_enabled = app_id
+            .features
+            .get(NETWORK_EXTENSION_FEATURE)
+            .and_then(|value| value.as_boolean())
+            .unwrap_or(false);
+
+        if !network_extension_enabled {
+            let mut features = Dictionary::new();
+            features.insert(NETWORK_EXTENSION_FEATURE.to_string(), true.into());
+            app_id = dev_session
+                .update_app_id(&team, &app_id, features, None)
+                .await?;
+
+            if !app_id
+                .features
+                .get(NETWORK_EXTENSION_FEATURE)
+                .and_then(|value| value.as_boolean())
+                .unwrap_or(false)
+            {
+                return Err(AppError::Developer(format!(
+                    "Apple did not enable Network Extensions for {identifier}. A developer team with the Network Extension capability is required."
+                )));
+            }
+        }
+    }
+
+    Ok(())
+}
+
+async fn installed_mobile_bundle_id(device: &DeviceInfo) -> Result<String, AppError> {
+    let provider = get_provider(device).await?;
+    let mut installation_proxy =
+        InstallationProxyClient::connect(&provider)
+            .await
+            .map_err(|e| {
+                AppError::DeviceComsWithMessage(
+                    "Failed to connect to installation proxy".into(),
+                    e.to_string(),
+                )
+            })?;
+
+    let installed_apps = installation_proxy
+        .get_apps(Some("User"), None)
+        .await
+        .map_err(|e| {
+            AppError::DeviceComsWithMessage("Failed to get installed apps".into(), e.to_string())
+        })?;
+
+    for (bundle_id, app) in installed_apps {
+        let dictionary = match app.as_dictionary() {
+            Some(value) => value,
+            None => continue,
+        };
+        let display_name = dictionary
+            .get("CFBundleDisplayName")
+            .or_else(|| dictionary.get("CFBundleName"))
+            .and_then(|value| value.as_string());
+
+        if is_ibridge_mobile_bundle_id(&bundle_id) || display_name == Some(MOBILE_DISPLAY_NAME) {
+            return Ok(bundle_id);
+        }
+    }
+
+    Err(AppError::Misc(
+        "iBridge Mobile was installed but its bundle could not be found".into(),
+    ))
+}
+
+#[tauri::command]
+pub async fn install_ibridge_mobile_operation(
+    handle: AppHandle,
+    window: Window,
+    device_state: State<'_, DeviceInfoMutex>,
+    sideloader_state: State<'_, SideloaderMutex>,
+    mobile_auth_state: State<'_, MobileBootstrapAuthMutex>,
+) -> Result<(), AppError> {
+    let op = Operation::new("install_ibridge_mobile".to_string(), &window);
+
+    let device = {
+        let guard = device_state.lock().unwrap();
+        guard.clone().ok_or(AppError::NoDeviceSelected)?
+    };
+    let auth = {
+        let guard = mobile_auth_state.lock().unwrap();
+        guard.clone().ok_or(AppError::NotLoggedIn)?
+    };
+
+    op.start("download")?;
+    let mobile_ipa_url =
+        std::env::var("IBRIDGE_MOBILE_IPA_URL").unwrap_or_else(|_| MOBILE_RELEASE_URL.to_string());
+    let destination = handle
+        .path()
+        .temp_dir()
+        .map_err(|e| AppError::Filesystem("Failed to get temp dir".into(), e.to_string()))?
+        .join(MOBILE_RELEASE_FILENAME);
+    op.fail_if_err("download", download(&mobile_ipa_url, &destination).await)?;
+
+    op.move_on("download", "install")?;
+    op.fail_if_err("install", prepare_mobile_app_ids(&sideloader_state).await)?;
+    op.fail_if_err(
+        "install",
+        sideload(
+            device_state,
+            sideloader_state,
+            destination.to_string_lossy().to_string(),
+        )
+        .await,
+    )?;
+
+    op.move_on("install", "bootstrap")?;
+    let bundle_id = op.fail_if_err("bootstrap", installed_mobile_bundle_id(&device.info).await)?;
+    let provider = op.fail_if_err("bootstrap", get_provider(&device.info).await)?;
+
+    op.fail_if_err(
+        "bootstrap",
+        place_file(
+            device.pairing.clone(),
+            &provider,
+            bundle_id.clone(),
+            MOBILE_PAIRING_PATH.to_string(),
+        )
+        .await,
+    )?;
+
+    let payload = MobileBootstrapPayload::new(
+        device.info.udid,
+        device.info.name,
+        device.info.version,
+        auth.email.clone(),
+        auth.anisette_server,
+    );
+    let payload = serde_json::to_vec(&payload)
+        .map_err(|e| AppError::Misc(format!("Failed to encode mobile bootstrap: {e}")))?;
+
+    op.fail_if_err(
+        "bootstrap",
+        place_file(
+            payload,
+            &provider,
+            bundle_id.clone(),
+            MOBILE_BOOTSTRAP_PATH.to_string(),
+        )
+        .await,
+    )?;
+
+    let secret = MobileAccountSecret::new(auth.email, auth.password);
+    let secret = serde_json::to_vec(&secret)
+        .map_err(|e| AppError::Misc(format!("Failed to encode mobile account secret: {e}")))?;
+
+    op.fail_if_err(
+        "bootstrap",
+        place_file(secret, &provider, bundle_id, MOBILE_SECRET_PATH.to_string()).await,
+    )?;
+
+    op.complete("bootstrap")?;
+    Ok(())
+}

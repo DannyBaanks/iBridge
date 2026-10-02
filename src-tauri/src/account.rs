@@ -20,6 +20,7 @@ use tracing::debug;
 
 use crate::{
     error::AppError,
+    mobile_bootstrap::{MobileBootstrapAuth, MobileBootstrapAuthMutex},
     secure_storage::create_sideloading_storage,
     sideload::{SideloaderGuard, SideloaderMutex},
 };
@@ -29,14 +30,24 @@ pub async fn login_new(
     handle: AppHandle,
     window: Window,
     sideloader_state: State<'_, SideloaderMutex>,
+    mobile_auth_state: State<'_, MobileBootstrapAuthMutex>,
     email: String,
     password: String,
     anisette_server: String,
     save_credentials: bool,
 ) -> Result<(), AppError> {
-    let account = login(&handle, &window, &email, &password, anisette_server).await?;
+    let account = login(&handle, &window, &email, &password, anisette_server.clone()).await?;
     let mut sideloader_guard = sideloader_state.lock().unwrap();
     *sideloader_guard = Some(account);
+    drop(sideloader_guard);
+
+    let mut mobile_auth_guard = mobile_auth_state.lock().unwrap();
+    *mobile_auth_guard = Some(MobileBootstrapAuth {
+        email: email.to_lowercase(),
+        password: password.clone(),
+        anisette_server,
+    });
+    drop(mobile_auth_guard);
 
     if save_credentials {
         let pass_entry = Entry::new("iloader", &email).map_err(|e| {
@@ -73,6 +84,7 @@ pub async fn login_stored(
     email: String,
     anisette_server: String,
     sideloader_state: State<'_, SideloaderMutex>,
+    mobile_auth_state: State<'_, MobileBootstrapAuthMutex>,
 ) -> Result<(), AppError> {
     let pass_entry = Entry::new("iloader", &email).map_err(|e| {
         AppError::KeyringWithMessage(
@@ -83,9 +95,17 @@ pub async fn login_stored(
     let password = pass_entry.get_password().map_err(|e| {
         AppError::KeyringWithMessage("Failed to get credentials".to_string(), e.to_string())
     })?;
-    let account = login(&handle, &window, &email, &password, anisette_server).await?;
+    let account = login(&handle, &window, &email, &password, anisette_server.clone()).await?;
     let mut sideloader_guard = sideloader_state.lock().unwrap();
     *sideloader_guard = Some(account);
+    drop(sideloader_guard);
+
+    let mut mobile_auth_guard = mobile_auth_state.lock().unwrap();
+    *mobile_auth_guard = Some(MobileBootstrapAuth {
+        email: email.to_lowercase(),
+        password,
+        anisette_server,
+    });
 
     Ok(())
 }
@@ -125,9 +145,16 @@ pub fn logged_in_as(sideloader_state: State<'_, SideloaderMutex>) -> Option<Stri
 }
 
 #[tauri::command]
-pub fn invalidate_account(sideloader_state: State<'_, SideloaderMutex>) {
+pub fn invalidate_account(
+    sideloader_state: State<'_, SideloaderMutex>,
+    mobile_auth_state: State<'_, MobileBootstrapAuthMutex>,
+) {
     let mut sideloader_guard = sideloader_state.lock().unwrap();
     *sideloader_guard = None;
+    drop(sideloader_guard);
+
+    let mut mobile_auth_guard = mobile_auth_state.lock().unwrap();
+    *mobile_auth_guard = None;
 }
 
 #[tauri::command]
@@ -210,42 +237,42 @@ async fn login(
 
     debug!("Created developer session");
 
-    let max_certs_callback = {
-        let window_clone = window.clone();
-        move |certs: &Vec<DevelopmentCertificate>| -> Option<Vec<String>> {
-            let cert_infos: Vec<CertificateInfo> = certs
-                .iter()
-                .map(|cert| CertificateInfo {
-                    name: cert.name.clone(),
-                    certificate_id: cert.certificate_id.clone(),
-                    serial_number: cert.serial_number.clone(),
-                    machine_name: cert.machine_name.clone(),
-                    machine_id: cert.machine_id.clone(),
-                })
-                .collect();
-            window_clone
-                .emit("max-certs-reached", cert_infos)
-                .expect("Failed to emit max-certs-reached event");
-
-            let (tx, rx) = std::sync::mpsc::channel::<Option<Vec<String>>>();
-            let handler_id = window_clone.listen("max-certs-response", move |event| {
-                let certs = event.payload();
-                let certs = serde_json::from_str::<Option<Vec<String>>>(certs).unwrap_or(None);
-                let _ = tx.send(certs);
-            });
-
-            let result = rx.recv_timeout(Duration::from_secs(300));
-            window_clone.unlisten(handler_id);
-            result.unwrap_or(None)
+    let max_certs_window = window.clone();
+    let max_certs_callback = Box::new(move |certs: &Vec<DevelopmentCertificate>| {
+        let window_clone = max_certs_window.clone();
+        let cert_infos: Vec<CertificateInfo> = certs
+            .iter()
+            .map(|cert| CertificateInfo {
+                name: cert.name.clone(),
+                certificate_id: cert.certificate_id.clone(),
+                serial_number: cert.serial_number.clone(),
+                machine_name: cert.machine_name.clone(),
+                machine_id: cert.machine_id.clone(),
+            })
+            .collect();
+        if let Err(error) = window_clone.emit("max-certs-reached", cert_infos) {
+            debug!("Failed to show certificate selection: {error}");
+            return None;
         }
-    };
+
+        let (tx, rx) = std::sync::mpsc::channel::<Option<Vec<String>>>();
+        let handler_id = window_clone.listen("max-certs-response", move |event| {
+            let certs =
+                serde_json::from_str::<Option<Vec<String>>>(event.payload()).unwrap_or(None);
+            let _ = tx.send(certs);
+        });
+
+        let result = rx.recv_timeout(Duration::from_secs(300)).ok().flatten();
+        window_clone.unlisten(handler_id);
+        result
+    });
 
     // TODO: Team Selection
 
     let sideloader = SideloaderBuilder::new(dev_session, email.to_lowercase())
         .machine_name("iloader".into())
         .storage(create_sideloading_storage(app)?)
-        .max_certs_behavior(MaxCertsBehavior::Prompt(Box::new(max_certs_callback)))
+        .max_certs_behavior(MaxCertsBehavior::Prompt(max_certs_callback))
         .build();
 
     debug!("Built sideloader");

@@ -29,7 +29,7 @@ const languages = [
   ["hu", "Magyar"],
   ["kh", "ភាសាខ្មែរ"],
   ["id", "Bahasa Indonesia"],
-  ["pt_br", "Português (Brasileiro)"]
+  ["pt_br", "Português (Brasileiro)"],
 ] as const;
 
 export const sortedLanguages = [...languages].sort((a, b) =>
@@ -37,6 +37,7 @@ export const sortedLanguages = [...languages].sort((a, b) =>
 );
 
 type TranslationResource = Record<string, unknown>;
+type ResourceMap = Record<string, { translation: TranslationResource }>;
 
 const localeModules = import.meta.glob<{ default: TranslationResource }>(
   "./locales/*.json",
@@ -52,7 +53,57 @@ const resources = Object.fromEntries(
 
     return [[lang, { translation: module.default }]];
   }),
-);
+) as ResourceMap;
+
+const iBridgeCopy = {
+  en: {
+    app: { ibridge_mobile: "Install iBridge Mobile" },
+    operations: {
+      install_ibridge_mobile_title: "Installing iBridge Mobile",
+      install_ibridge_mobile_success_title: "iBridge Mobile Installed!",
+      install_ibridge_mobile_success_message:
+        "Open iBridge on your iPhone. Pairing and account bootstrap are already in place.",
+      install_ibridge_mobile_step_download: "Download iBridge Mobile",
+      install_ibridge_mobile_step_install: "Sign & Install iBridge Mobile",
+      install_ibridge_mobile_step_bootstrap: "Configure This iPhone",
+      mobile_sideload_title: "Installing IPA",
+      mobile_sideload_step_install: "Sign & Install IPA",
+      mobile_refresh_title: "Refreshing iBridge",
+      mobile_refresh_success_title: "iBridge Refreshed!",
+      mobile_refresh_step_download: "Download iBridge Mobile",
+      mobile_refresh_step_install: "Sign & Refresh iBridge",
+    },
+  },
+  es: {
+    app: { ibridge_mobile: "Instalar iBridge Mobile" },
+    operations: {
+      install_ibridge_mobile_title: "Instalando iBridge Mobile",
+      install_ibridge_mobile_success_title: "¡iBridge Mobile instalado!",
+      install_ibridge_mobile_success_message:
+        "Abre iBridge en tu iPhone. El pairing y la cuenta ya quedaron configurados.",
+      install_ibridge_mobile_step_download: "Descargar iBridge Mobile",
+      install_ibridge_mobile_step_install: "Firmar e instalar iBridge Mobile",
+      install_ibridge_mobile_step_bootstrap: "Configurar este iPhone",
+      mobile_sideload_title: "Instalando IPA",
+      mobile_sideload_step_install: "Firmar e instalar IPA",
+      mobile_refresh_title: "Refrescando iBridge",
+      mobile_refresh_success_title: "¡iBridge refrescado!",
+      mobile_refresh_step_download: "Descargar iBridge Mobile",
+      mobile_refresh_step_install: "Firmar y refrescar iBridge",
+    },
+  },
+} satisfies Record<string, Record<string, Record<string, string>>>;
+
+for (const [language, sections] of Object.entries(iBridgeCopy)) {
+  const translation = resources[language]?.translation;
+  if (!translation) continue;
+  for (const [section, copy] of Object.entries(sections)) {
+    translation[section] = {
+      ...((translation[section] as Record<string, unknown> | undefined) ?? {}),
+      ...copy,
+    };
+  }
+}
 
 i18n
   .use(LanguageDetector)

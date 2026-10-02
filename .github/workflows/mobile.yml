@@ -1,0 +1,115 @@
+name: Build iBridge Mobile
+
+on:
+  push:
+    branches:
+      - "*"
+  pull_request:
+    branches:
+      - "*"
+  workflow_dispatch:
+  release:
+    types: [published]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  mobile:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install Rust iOS target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-ios
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install frontend dependencies
+        run: bun i --frozen-lockfile
+
+      - name: Initialize Tauri iOS project
+        run: bun tauri ios init --ci
+
+      - name: Build frontend assets
+        run: bun run build
+
+      - name: Compile unsigned Tauri iOS app
+        shell: bash
+        run: |
+          set -euo pipefail
+          PROJECT=$(find src-tauri/gen/apple -maxdepth 1 -name '*.xcodeproj' -print -quit)
+          if [ -z "$PROJECT" ]; then
+            echo "Generated Xcode project not found" >&2
+            exit 1
+          fi
+
+          SCHEME=$(xcodebuild -project "$PROJECT" -list -json | python3 -c '
+          import json, sys
+          data = json.load(sys.stdin)
+          schemes = data.get("project", {}).get("schemes", [])
+          scheme = next((value for value in schemes if value.endswith("_iOS")), None)
+          if not scheme:
+              raise SystemExit("No generated iOS scheme found")
+          print(scheme)
+          ')
+
+          mkdir -p mobile-ci/app
+          xcodebuild \
+            -project "$PROJECT" \
+            -scheme "$SCHEME" \
+            -configuration release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            DEVELOPMENT_TEAM= \
+            ARCHS=arm64 \
+            ONLY_ACTIVE_ARCH=YES \
+            CONFIGURATION_BUILD_DIR="$PWD/mobile-ci/app" \
+            build
+
+      - name: Package resignable IPA
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP=$(find mobile-ci/app -maxdepth 1 -type d -name '*.app' -print -quit)
+          if [ -z "$APP" ]; then
+            echo "Built iOS app not found" >&2
+            exit 1
+          fi
+
+          if [ ! -d "$APP/PlugIns/IBridgeTunnelProvider.appex" ]; then
+            echo "Embedded IBridgeTunnelProvider.appex not found" >&2
+            find "$APP" -maxdepth 3 -print
+            exit 1
+          fi
+
+          mkdir -p mobile-ci/Payload
+          cp -R "$APP" mobile-ci/Payload/iBridge.app
+          (
+            cd mobile-ci
+            zip -qry iBridge-Mobile.ipa Payload
+          )
+          test -s mobile-ci/iBridge-Mobile.ipa
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: iBridge-Mobile
+          path: mobile-ci/iBridge-Mobile.ipa
+          if-no-files-found: error
+
+      - name: Attach IPA to release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" mobile-ci/iBridge-Mobile.ipa --clobber

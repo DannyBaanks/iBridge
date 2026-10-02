@@ -36,6 +36,27 @@ type OperationFailedUpdate = {
 
 export type OperationUpdate = OperationInfoUpdate | OperationFailedUpdate;
 
+export const installIBridgeMobileOperation: Operation = {
+  id: "install_ibridge_mobile",
+  titleKey: "operations.install_ibridge_mobile_title",
+  successTitleKey: "operations.install_ibridge_mobile_success_title",
+  successMessageKey: "operations.install_ibridge_mobile_success_message",
+  steps: [
+    {
+      id: "download",
+      titleKey: "operations.install_ibridge_mobile_step_download",
+    },
+    {
+      id: "install",
+      titleKey: "operations.install_ibridge_mobile_step_install",
+    },
+    {
+      id: "bootstrap",
+      titleKey: "operations.install_ibridge_mobile_step_bootstrap",
+    },
+  ],
+};
+
 export const installSideStoreOperation: Operation = {
   id: "install_sidestore",
   titleKey: "operations.install_sidestore_title",

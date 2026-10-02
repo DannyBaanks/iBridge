@@ -7,6 +7,7 @@ import { open as openFileDialog } from "@tauri-apps/plugin-dialog";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import {
   sideloadOperation,
+  installIBridgeMobileOperation,
   installSideStoreOperation,
   installLiveContainerOperation,
   Operation,
@@ -185,7 +186,7 @@ function App() {
           <div className="title-block">
             <img src={logo} alt={t("app.logo_alt")} className="logo" />
             <div>
-              <h1 className="title">iloader</h1>
+              <h1 className="title">iBridge</h1>
               <p className="subtitle">{t("subtitle")}</p>
             </div>
           </div>
@@ -198,7 +199,7 @@ function App() {
             className="toolbar-button"
             onClick={async () => {
               try {
-                await openUrl("https://github.com/nab138/iloader");
+                await openUrl("https://github.com/DannyBaanks/iBridge");
               } catch (error) {
                 console.error("Failed to open GitHub link", error);
                 toast.error(t("app.open_github_failed"));
@@ -214,7 +215,6 @@ function App() {
           <section className="workspace-section">
             <div className="section-header">
               <p className="section-label">{t("app.section_account")}</p>
-              {/* here to ensure spacing and stuff is correct */}
               <span className="section-hint placeholder" aria-hidden="true">
                 Placeholder
               </span>
@@ -305,6 +305,17 @@ function App() {
             </div>
             <GlassCard className="panel">
               <div className="action-row single-row">
+                <button
+                  onClick={() => {
+                    if (!ensuredLoggedIn() || !ensureSelectedDevice()) return;
+                    startOperation(installIBridgeMobileOperation, {}).catch((e) => {
+                      console.log(e.type);
+                      console.error(e.message);
+                    });
+                  }}
+                >
+                  {t("app.ibridge_mobile")}
+                </button>
                 <button
                   onClick={() => {
                     if (!ensuredLoggedIn() || !ensureSelectedDevice()) return;

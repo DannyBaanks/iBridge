@@ -10,7 +10,10 @@ mod pairing;
 mod secure_storage;
 mod error;
 mod logging;
+pub mod mobile_bootstrap;
+mod mobile_runtime;
 mod operation;
+mod tunnel_control;
 
 use crate::{
     account::{
@@ -20,24 +23,37 @@ use crate::{
     device::{
         DeviceInfoMutex, PairingCancelToken, cancel_pairing, list_devices, set_selected_device,
     },
+    mobile_bootstrap::{MobileBootstrapAuthMutex, install_ibridge_mobile_operation},
+    mobile_runtime::{
+        mobile_refresh_self_operation, mobile_restore_bootstrap_account, mobile_runtime_status,
+        mobile_sideload_operation,
+    },
     pairing::{
         delete_stored_rppairing, export_pairing_cmd, has_stored_rppairing, installed_pairing_apps,
         place_pairing_cmd,
     },
     secure_storage::{force_disable_keyring, keyring_available},
     sideload::{SideloaderMutex, install_sidestore_operation, sideload_operation},
+    tunnel_control::{mobile_tunnel_start, mobile_tunnel_status, mobile_tunnel_stop},
 };
 use tauri::Manager;
 use tracing_subscriber::{Layer, Registry, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    let builder = tauri::Builder::default()
         .plugin(tauri_plugin_process::init())
-        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_store::Builder::new().build())
+        .plugin(tauri_plugin_store::Builder::new().build());
+
+    #[cfg(not(mobile))]
+    let builder = builder.plugin(tauri_plugin_updater::Builder::new().build());
+
+    #[cfg(target_os = "ios")]
+    let builder = builder.plugin(tauri_plugin_ibridge_tunnel::init());
+
+    builder
         .setup(|app| {
             let log_dir = app
                 .path()
@@ -101,6 +117,7 @@ pub fn run() {
             app.manage(DeviceInfoMutex::new(None));
             app.manage(SideloaderMutex::new(None));
             app.manage(PairingCancelToken::new(None));
+            app.manage(MobileBootstrapAuthMutex::new(None));
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -113,6 +130,14 @@ pub fn run() {
             sideload_operation,
             set_selected_device,
             install_sidestore_operation,
+            install_ibridge_mobile_operation,
+            mobile_restore_bootstrap_account,
+            mobile_runtime_status,
+            mobile_sideload_operation,
+            mobile_refresh_self_operation,
+            mobile_tunnel_start,
+            mobile_tunnel_status,
+            mobile_tunnel_stop,
             get_certificates,
             revoke_certificate,
             list_app_ids,
