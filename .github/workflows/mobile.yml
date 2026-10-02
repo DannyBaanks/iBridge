@@ -25,43 +25,44 @@ jobs:
         with:
           targets: aarch64-apple-ios
 
-      - name: Install XcodeGen
-        run: brew install xcodegen
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
 
-      - name: Build Rust signing core
+      - name: Install frontend dependencies
+        run: bun i --frozen-lockfile
+
+      - name: Initialize Tauri iOS project
+        run: bun tauri ios init --ci
+
+      - name: Build frontend assets
+        run: bun run build
+
+      - name: Compile unsigned Tauri iOS app
         run: |
-          cargo build \
-            --manifest-path mobile/ibridge-core/Cargo.toml \
-            --release \
-            --target aarch64-apple-ios
-          mkdir -p mobile/build
-          cp mobile/ibridge-core/target/aarch64-apple-ios/release/libibridge_core.a mobile/build/libridge_core.a
-
-      - name: Generate Xcode project
-        working-directory: mobile
-        run: xcodegen generate --spec project.yml
-
-      - name: Compile unsigned iOS app
-        working-directory: mobile
-        run: |
-          mkdir -p build/app
+          PROJECT=$(find src-tauri/gen/apple -maxdepth 1 -name '*.xcodeproj' -print -quit)
+          test -n "$PROJECT"
+          SCHEME=$(xcodebuild -project "$PROJECT" -list -json | python3 -c 'import json,sys; data=json.load(sys.stdin); print(data["project"]["schemes"][0])')
+          mkdir -p mobile-ci/app
           xcodebuild \
-            -project iBridgeMobile.xcodeproj \
-            -scheme iBridgeMobile \
-            -configuration Release \
+            -project "$PROJECT" \
+            -scheme "$SCHEME" \
+            -configuration release \
             -sdk iphoneos \
             -destination 'generic/platform=iOS' \
             CODE_SIGNING_ALLOWED=NO \
-            CONFIGURATION_BUILD_DIR="$PWD/build/app" \
+            CODE_SIGNING_REQUIRED=NO \
+            CONFIGURATION_BUILD_DIR="$PWD/mobile-ci/app" \
             build
 
       - name: Package resignable IPA
-        working-directory: mobile
         run: |
-          test -d build/app/iBridge.app
-          mkdir -p build/Payload
-          cp -R build/app/iBridge.app build/Payload/iBridge.app
-          cd build
+          APP=$(find mobile-ci/app -maxdepth 1 -name '*.app' -print -quit)
+          test -n "$APP"
+          rm -rf mobile-ci/Payload
+          mkdir -p mobile-ci/Payload
+          cp -R "$APP" mobile-ci/Payload/iBridge.app
+          cd mobile-ci
           zip -qry iBridge-Mobile.ipa Payload
           test -s iBridge-Mobile.ipa
 
@@ -69,10 +70,10 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: iBridge-Mobile
-          path: mobile/build/iBridge-Mobile.ipa
+          path: mobile-ci/iBridge-Mobile.ipa
 
       - name: Attach IPA to release
         if: github.event_name == 'release'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "${{ github.event.release.tag_name }}" mobile/build/iBridge-Mobile.ipa --clobber
+        run: gh release upload "${{ github.event.release.tag_name }}" mobile-ci/iBridge-Mobile.ipa --clobber
