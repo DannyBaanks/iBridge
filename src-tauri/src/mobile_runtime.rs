@@ -2,16 +2,20 @@ use std::{net::IpAddr, path::PathBuf, str::FromStr};
 
 use idevice::{
     IdeviceService,
+    lockdown::LockdownClient,
     pairing_file::PairingFile,
     provider::TcpProvider,
-    services::lockdown::LockdownClient,
 };
 use serde::Serialize;
 use tauri::{AppHandle, Manager, State, Window};
 
 use crate::{
+    account::{login_new, login_stored},
     error::AppError,
-    mobile_bootstrap::{MOBILE_PAIRING_PATH, MOBILE_RELEASE_URL},
+    mobile_bootstrap::{
+        MOBILE_BOOTSTRAP_PATH, MOBILE_PAIRING_PATH, MOBILE_RELEASE_URL, MOBILE_SECRET_PATH,
+        MobileAccountSecret, MobileBootstrapAuthMutex, MobileBootstrapPayload,
+    },
     operation::Operation,
     sideload::{SideloaderGuard, SideloaderMutex, download},
 };
@@ -54,6 +58,72 @@ fn mobile_provider(handle: &AppHandle) -> Result<TcpProvider, AppError> {
         pairing_file,
         label: "iBridge Mobile".into(),
     })
+}
+
+#[tauri::command]
+pub async fn mobile_restore_bootstrap_account(
+    handle: AppHandle,
+    window: Window,
+    sideloader_state: State<'_, SideloaderMutex>,
+    mobile_auth_state: State<'_, MobileBootstrapAuthMutex>,
+) -> Result<String, AppError> {
+    let bootstrap_path = document_path(&handle, MOBILE_BOOTSTRAP_PATH)?;
+    let bootstrap_bytes = std::fs::read(&bootstrap_path).map_err(|e| {
+        AppError::Filesystem(
+            "iBridge Mobile bootstrap metadata is missing".into(),
+            format!("{}: {e}", bootstrap_path.display()),
+        )
+    })?;
+    let bootstrap: MobileBootstrapPayload = serde_json::from_slice(&bootstrap_bytes)
+        .map_err(|e| AppError::Misc(format!("Invalid iBridge Mobile bootstrap metadata: {e}")))?;
+
+    let secret_path = document_path(&handle, MOBILE_SECRET_PATH)?;
+    if secret_path.is_file() {
+        let secret_bytes = std::fs::read(&secret_path).map_err(|e| {
+            AppError::Filesystem(
+                "Failed to read iBridge Mobile account bootstrap".into(),
+                e.to_string(),
+            )
+        })?;
+        let secret: MobileAccountSecret = serde_json::from_slice(&secret_bytes)
+            .map_err(|e| AppError::Misc(format!("Invalid mobile account bootstrap: {e}")))?;
+        if secret.apple_id != bootstrap.apple_id {
+            return Err(AppError::Misc(
+                "Mobile account bootstrap does not match bootstrap metadata".into(),
+            ));
+        }
+
+        login_new(
+            handle.clone(),
+            window,
+            sideloader_state,
+            mobile_auth_state,
+            secret.apple_id.clone(),
+            secret.password,
+            bootstrap.anisette_server,
+            true,
+        )
+        .await?;
+
+        std::fs::remove_file(&secret_path).map_err(|e| {
+            AppError::Filesystem(
+                "Account imported but one-time bootstrap secret could not be deleted".into(),
+                e.to_string(),
+            )
+        })?;
+        Ok(secret.apple_id)
+    } else {
+        login_stored(
+            handle,
+            window,
+            bootstrap.apple_id.clone(),
+            bootstrap.anisette_server,
+            sideloader_state,
+            mobile_auth_state,
+        )
+        .await?;
+        Ok(bootstrap.apple_id)
+    }
 }
 
 #[tauri::command]
