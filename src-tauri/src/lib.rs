@@ -11,6 +11,7 @@ mod secure_storage;
 mod error;
 mod logging;
 pub mod mobile_bootstrap;
+mod mobile_runtime;
 mod operation;
 
 use crate::{
@@ -22,6 +23,10 @@ use crate::{
         DeviceInfoMutex, PairingCancelToken, cancel_pairing, list_devices, set_selected_device,
     },
     mobile_bootstrap::{MobileBootstrapAuthMutex, install_ibridge_mobile_operation},
+    mobile_runtime::{
+        mobile_refresh_self_operation, mobile_restore_bootstrap_account, mobile_runtime_status,
+        mobile_sideload_operation,
+    },
     pairing::{
         delete_stored_rppairing, export_pairing_cmd, has_stored_rppairing, installed_pairing_apps,
         place_pairing_cmd,
@@ -34,12 +39,16 @@ use tracing_subscriber::{Layer, Registry, fmt, layer::SubscriberExt, util::Subsc
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    let builder = tauri::Builder::default()
         .plugin(tauri_plugin_process::init())
-        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_store::Builder::new().build())
+        .plugin(tauri_plugin_store::Builder::new().build());
+
+    #[cfg(not(mobile))]
+    let builder = builder.plugin(tauri_plugin_updater::Builder::new().build());
+
+    builder
         .setup(|app| {
             let log_dir = app
                 .path()
@@ -117,6 +126,10 @@ pub fn run() {
             set_selected_device,
             install_sidestore_operation,
             install_ibridge_mobile_operation,
+            mobile_restore_bootstrap_account,
+            mobile_runtime_status,
+            mobile_sideload_operation,
+            mobile_refresh_self_operation,
             get_certificates,
             revoke_certificate,
             list_app_ids,
