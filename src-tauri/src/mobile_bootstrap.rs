@@ -13,12 +13,14 @@ use crate::{
     sideload::{SideloaderMutex, download, sideload},
 };
 
-const DEFAULT_MOBILE_IPA_URL: &str =
+pub const MOBILE_RELEASE_URL: &str =
     "https://github.com/DannyBaanks/iBridge/releases/latest/download/iBridge-Mobile.ipa";
 const MOBILE_DISPLAY_NAME: &str = "iBridge";
-const MOBILE_BUNDLE_PREFIX: &str = "com.dannybaanks.ibridge.mobile";
-const MOBILE_PAIRING_PATH: &str = "bootstrap/pairing.plist";
-const MOBILE_BOOTSTRAP_PATH: &str = "bootstrap/iBridgeBootstrap.json";
+pub const MOBILE_BUNDLE_PREFIX: &str = "me.dannybaanks.ibridge.mobile";
+pub const MOBILE_PAIRING_PATH: &str = "iBridgeBootstrap/pairing.plist";
+pub const MOBILE_BOOTSTRAP_PATH: &str = "iBridgeBootstrap/bootstrap.json";
+pub const MOBILE_SECRET_PATH: &str = "iBridgeBootstrap/account-secret.json";
+const MOBILE_RELEASE_FILENAME: &str = "iBridge-Mobile.ipa";
 
 #[derive(Clone)]
 pub struct MobileBootstrapAuth {
@@ -28,16 +30,47 @@ pub struct MobileBootstrapAuth {
 
 pub type MobileBootstrapAuthMutex = Mutex<Option<MobileBootstrapAuth>>;
 
-#[derive(Serialize)]
+#[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
-struct MobileBootstrapPayload {
-    version: u8,
-    apple_id: String,
-    anisette_server: String,
+pub struct MobileBootstrapPayload {
+    schema: &'static str,
     device_udid: String,
     device_name: String,
     device_version: String,
+    apple_id: String,
+    anisette_server: String,
+    pairing_path: &'static str,
+    secret_path: &'static str,
     created_at: String,
+}
+
+impl MobileBootstrapPayload {
+    pub fn new(
+        device_udid: impl Into<String>,
+        device_name: impl Into<String>,
+        device_version: impl Into<String>,
+        apple_id: impl Into<String>,
+        anisette_server: impl Into<String>,
+    ) -> Self {
+        Self {
+            schema: "ibridge.mobile-bootstrap/1",
+            device_udid: device_udid.into(),
+            device_name: device_name.into(),
+            device_version: device_version.into(),
+            apple_id: apple_id.into(),
+            anisette_server: anisette_server.into(),
+            pairing_path: MOBILE_PAIRING_PATH,
+            secret_path: MOBILE_SECRET_PATH,
+            created_at: Utc::now().to_rfc3339(),
+        }
+    }
+}
+
+pub fn is_ibridge_mobile_bundle_id(bundle_id: &str) -> bool {
+    bundle_id == MOBILE_BUNDLE_PREFIX
+        || bundle_id
+            .strip_prefix(MOBILE_BUNDLE_PREFIX)
+            .is_some_and(|suffix| suffix.starts_with('.'))
 }
 
 async fn installed_mobile_bundle_id(device: &DeviceInfo) -> Result<String, AppError> {
@@ -68,7 +101,7 @@ async fn installed_mobile_bundle_id(device: &DeviceInfo) -> Result<String, AppEr
             .or_else(|| dictionary.get("CFBundleName"))
             .and_then(|value| value.as_string());
 
-        if display_name == Some(MOBILE_DISPLAY_NAME) || bundle_id.starts_with(MOBILE_BUNDLE_PREFIX) {
+        if is_ibridge_mobile_bundle_id(&bundle_id) || display_name == Some(MOBILE_DISPLAY_NAME) {
             return Ok(bundle_id);
         }
     }
@@ -99,12 +132,12 @@ pub async fn install_ibridge_mobile_operation(
 
     op.start("download")?;
     let mobile_ipa_url = std::env::var("IBRIDGE_MOBILE_IPA_URL")
-        .unwrap_or_else(|_| DEFAULT_MOBILE_IPA_URL.to_string());
+        .unwrap_or_else(|_| MOBILE_RELEASE_URL.to_string());
     let destination = handle
         .path()
         .temp_dir()
         .map_err(|e| AppError::Filesystem("Failed to get temp dir".into(), e.to_string()))?
-        .join("iBridge-Mobile.ipa");
+        .join(MOBILE_RELEASE_FILENAME);
     op.fail_if_err("download", download(&mobile_ipa_url, &destination).await)?;
 
     op.move_on("download", "install")?;
@@ -133,15 +166,13 @@ pub async fn install_ibridge_mobile_operation(
         .await,
     )?;
 
-    let payload = MobileBootstrapPayload {
-        version: 1,
-        apple_id: auth.email,
-        anisette_server: auth.anisette_server,
-        device_udid: device.info.udid,
-        device_name: device.info.name,
-        device_version: device.info.version,
-        created_at: Utc::now().to_rfc3339(),
-    };
+    let payload = MobileBootstrapPayload::new(
+        device.info.udid,
+        device.info.name,
+        device.info.version,
+        auth.email,
+        auth.anisette_server,
+    );
     let payload = serde_json::to_vec(&payload)
         .map_err(|e| AppError::Misc(format!("Failed to encode mobile bootstrap: {e}")))?;
 
