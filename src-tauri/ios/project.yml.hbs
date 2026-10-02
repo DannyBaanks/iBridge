@@ -94,7 +94,6 @@ targets:
       - sdk: QuartzCore.framework
       - sdk: Security.framework
       - sdk: UIKit.framework
-      - sdk: NetworkExtension.framework
       {{#if ios-frameworks}}{{~#each ios-frameworks}}
       - sdk: {{this}}.framework{{/each}}{{/if}}
       - target: IBridgeTunnelProvider
