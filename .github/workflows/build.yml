@@ -186,6 +186,46 @@ jobs:
           path: |
             ${{ github.workspace }}/src-tauri/target/release/bundle/**/*.exe
 
+  ios:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Cache Rust and bun dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            src-tauri/target
+            node_modules
+          key: ios-iloader-${{ hashFiles('**/Cargo.lock', 'package-lock.json') }}
+          restore-keys: |
+            macos-iloader-
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-ios
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install frontend dependencies
+        run: bun i --frozen-lockfile
+
+      - name: Build iOS IPA
+        run: bun run tauri ios build --target aarch64-apple-ios
+
+      - name: Upload iOS IPA
+        uses: actions/upload-artifact@v7
+        with:
+          name: ios-ipa
+          path: ${{ github.workspace }}/src-tauri/target/aarch64-apple-ios/release/bundle/**/*.ipa
+
   mark-latest:
     needs: build
     if: github.event_name == 'release'
