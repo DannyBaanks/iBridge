@@ -2,6 +2,8 @@ use std::sync::Mutex;
 
 use chrono::Utc;
 use idevice::{IdeviceService, installation_proxy::InstallationProxyClient};
+use isideload::dev::app_ids::AppIdsApi;
+use plist_macro::plist;
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Manager, State, Window};
 
@@ -10,7 +12,7 @@ use crate::{
     error::AppError,
     operation::Operation,
     pairing::place_file,
-    sideload::{SideloaderMutex, download, sideload},
+    sideload::{SideloaderGuard, SideloaderMutex, download, sideload},
 };
 
 pub const MOBILE_RELEASE_URL: &str =
@@ -21,6 +23,7 @@ pub const MOBILE_PAIRING_PATH: &str = "iBridgeBootstrap/pairing.plist";
 pub const MOBILE_BOOTSTRAP_PATH: &str = "iBridgeBootstrap/bootstrap.json";
 pub const MOBILE_SECRET_PATH: &str = "iBridgeBootstrap/account-secret.json";
 const MOBILE_RELEASE_FILENAME: &str = "iBridge-Mobile.ipa";
+const NETWORK_EXTENSION_FEATURE: &str = "NWEXT04537";
 
 #[derive(Clone)]
 pub struct MobileBootstrapAuth {
@@ -92,6 +95,61 @@ pub fn is_ibridge_mobile_bundle_id(bundle_id: &str) -> bool {
             .is_some_and(|suffix| suffix.starts_with('.'))
 }
 
+async fn prepare_mobile_app_ids(sideloader_state: &SideloaderMutex) -> Result<(), AppError> {
+    let mut sideloader = SideloaderGuard::take(sideloader_state)?;
+    let team = sideloader.get_mut().get_team().await?;
+    let dev_session = sideloader.get_mut().get_dev_session();
+    let existing = dev_session.list_app_ids(&team, None).await?.app_ids;
+
+    let main_bundle_id = format!("{}.{}", MOBILE_BUNDLE_PREFIX, team.team_id);
+    let tunnel_bundle_id = format!("{}.tunnel", main_bundle_id);
+
+    for (name, identifier) in [
+        ("iBridge Mobile", main_bundle_id),
+        ("iBridge Tunnel", tunnel_bundle_id),
+    ] {
+        let mut app_id = if let Some(found) = existing
+            .iter()
+            .find(|app_id| app_id.identifier == identifier)
+            .cloned()
+        {
+            found
+        } else {
+            dev_session
+                .add_app_id(&team, name, &identifier, None)
+                .await?
+        };
+
+        let network_extension_enabled = app_id
+            .features
+            .get(NETWORK_EXTENSION_FEATURE)
+            .and_then(|value| value.as_boolean())
+            .unwrap_or(false);
+
+        if !network_extension_enabled {
+            let features = plist!(dict {
+                NETWORK_EXTENSION_FEATURE => true,
+            });
+            app_id = dev_session
+                .update_app_id(&team, &app_id, features, None)
+                .await?;
+
+            if !app_id
+                .features
+                .get(NETWORK_EXTENSION_FEATURE)
+                .and_then(|value| value.as_boolean())
+                .unwrap_or(false)
+            {
+                return Err(AppError::Developer(format!(
+                    "Apple did not enable Network Extensions for {identifier}. A developer team with the Network Extension capability is required."
+                )));
+            }
+        }
+    }
+
+    Ok(())
+}
+
 async fn installed_mobile_bundle_id(device: &DeviceInfo) -> Result<String, AppError> {
     let provider = get_provider(device).await?;
     let mut installation_proxy = InstallationProxyClient::connect(&provider)
@@ -160,6 +218,10 @@ pub async fn install_ibridge_mobile_operation(
     op.fail_if_err("download", download(&mobile_ipa_url, &destination).await)?;
 
     op.move_on("download", "install")?;
+    op.fail_if_err(
+        "install",
+        prepare_mobile_app_ids(&sideloader_state).await,
+    )?;
     op.fail_if_err(
         "install",
         sideload(
