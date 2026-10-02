@@ -10,7 +10,7 @@ mod pairing;
 mod secure_storage;
 mod error;
 mod logging;
-mod mobile_bootstrap;
+pub mod mobile_bootstrap;
 mod operation;
 
 use crate::{
