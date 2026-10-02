@@ -1,0 +1,9 @@
+{
+  "productName": "iBridge",
+  "identifier": "com.dannybaanks.ibridge.mobile",
+  "bundle": {
+    "iOS": {
+      "minimumSystemVersion": "17.0"
+    }
+  }
+}
