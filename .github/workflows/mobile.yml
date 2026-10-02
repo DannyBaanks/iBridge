@@ -1,0 +1,78 @@
+name: Build iBridge Mobile
+
+on:
+  push:
+    branches:
+      - "*"
+  pull_request:
+    branches:
+      - "*"
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  mobile:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install Rust iOS target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-ios
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Build Rust signing core
+        run: |
+          cargo build \
+            --manifest-path mobile/ibridge-core/Cargo.toml \
+            --release \
+            --target aarch64-apple-ios
+          mkdir -p mobile/build
+          cp mobile/ibridge-core/target/aarch64-apple-ios/release/libibridge_core.a mobile/build/libridge_core.a
+
+      - name: Generate Xcode project
+        working-directory: mobile
+        run: xcodegen generate --spec project.yml
+
+      - name: Compile unsigned iOS app
+        working-directory: mobile
+        run: |
+          mkdir -p build/app
+          xcodebuild \
+            -project iBridgeMobile.xcodeproj \
+            -scheme iBridgeMobile \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGNING_ALLOWED=NO \
+            CONFIGURATION_BUILD_DIR="$PWD/build/app" \
+            build
+
+      - name: Package resignable IPA
+        working-directory: mobile
+        run: |
+          test -d build/app/iBridge.app
+          mkdir -p build/Payload
+          cp -R build/app/iBridge.app build/Payload/iBridge.app
+          cd build
+          zip -qry iBridge-Mobile.ipa Payload
+          test -s iBridge-Mobile.ipa
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: iBridge-Mobile
+          path: mobile/build/iBridge-Mobile.ipa
+
+      - name: Attach IPA to release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" mobile/build/iBridge-Mobile.ipa --clobber
