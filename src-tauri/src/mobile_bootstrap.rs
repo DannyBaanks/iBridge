@@ -16,7 +16,7 @@ use crate::{
 pub const MOBILE_RELEASE_URL: &str =
     "https://github.com/DannyBaanks/iBridge/releases/latest/download/iBridge-Mobile.ipa";
 const MOBILE_DISPLAY_NAME: &str = "iBridge";
-pub const MOBILE_BUNDLE_PREFIX: &str = "me.dannybaanks.ibridge.mobile";
+pub const MOBILE_BUNDLE_PREFIX: &str = "com.dannybaanks.ibridge.mobile";
 pub const MOBILE_PAIRING_PATH: &str = "iBridgeBootstrap/pairing.plist";
 pub const MOBILE_BOOTSTRAP_PATH: &str = "iBridgeBootstrap/bootstrap.json";
 pub const MOBILE_SECRET_PATH: &str = "iBridgeBootstrap/account-secret.json";
