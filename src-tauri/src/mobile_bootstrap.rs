@@ -2,7 +2,7 @@ use std::sync::Mutex;
 
 use chrono::Utc;
 use idevice::{IdeviceService, installation_proxy::InstallationProxyClient};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Manager, State, Window};
 
 use crate::{
@@ -31,18 +31,18 @@ pub struct MobileBootstrapAuth {
 
 pub type MobileBootstrapAuthMutex = Mutex<Option<MobileBootstrapAuth>>;
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MobileBootstrapPayload {
-    schema: &'static str,
-    device_udid: String,
-    device_name: String,
-    device_version: String,
-    apple_id: String,
-    anisette_server: String,
-    pairing_path: &'static str,
-    secret_path: &'static str,
-    created_at: String,
+    pub(crate) schema: String,
+    pub(crate) device_udid: String,
+    pub(crate) device_name: String,
+    pub(crate) device_version: String,
+    pub(crate) apple_id: String,
+    pub(crate) anisette_server: String,
+    pub(crate) pairing_path: String,
+    pub(crate) secret_path: String,
+    pub(crate) created_at: String,
 }
 
 impl MobileBootstrapPayload {
@@ -54,31 +54,31 @@ impl MobileBootstrapPayload {
         anisette_server: impl Into<String>,
     ) -> Self {
         Self {
-            schema: "ibridge.mobile-bootstrap/1",
+            schema: "ibridge.mobile-bootstrap/1".into(),
             device_udid: device_udid.into(),
             device_name: device_name.into(),
             device_version: device_version.into(),
             apple_id: apple_id.into(),
             anisette_server: anisette_server.into(),
-            pairing_path: MOBILE_PAIRING_PATH,
-            secret_path: MOBILE_SECRET_PATH,
+            pairing_path: MOBILE_PAIRING_PATH.into(),
+            secret_path: MOBILE_SECRET_PATH.into(),
             created_at: Utc::now().to_rfc3339(),
         }
     }
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MobileAccountSecret {
-    schema: &'static str,
-    apple_id: String,
-    password: String,
+    pub(crate) schema: String,
+    pub(crate) apple_id: String,
+    pub(crate) password: String,
 }
 
 impl MobileAccountSecret {
     pub fn new(apple_id: impl Into<String>, password: impl Into<String>) -> Self {
         Self {
-            schema: "ibridge.mobile-account-secret/1",
+            schema: "ibridge.mobile-account-secret/1".into(),
             apple_id: apple_id.into(),
             password: password.into(),
         }
