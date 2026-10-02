@@ -17,16 +17,17 @@ import logo from "./iloader.svg";
 
 const mobileSideloadOperation: Operation = {
   id: "mobile_sideload",
-  titleKey: "operations.sideload_title",
-  steps: [{ id: "install", titleKey: "operations.sideload_step_install" }],
+  titleKey: "operations.mobile_sideload_title",
+  steps: [{ id: "install", titleKey: "operations.mobile_sideload_step_install" }],
 };
 
 const mobileRefreshOperation: Operation = {
   id: "mobile_refresh_self",
-  titleKey: "operations.sideload_title",
+  titleKey: "operations.mobile_refresh_title",
+  successTitleKey: "operations.mobile_refresh_success_title",
   steps: [
-    { id: "download", titleKey: "operations.install_ibridge_mobile_step_download" },
-    { id: "install", titleKey: "operations.sideload_step_install" },
+    { id: "download", titleKey: "operations.mobile_refresh_step_download" },
+    { id: "install", titleKey: "operations.mobile_refresh_step_install" },
   ],
 };
 
@@ -36,10 +37,19 @@ type RuntimeStatus = {
   tunnelHost: string;
 };
 
+type TunnelControlStatus = {
+  connected: boolean;
+  status: string;
+};
+
+const delay = (milliseconds: number) =>
+  new Promise<void>((resolve) => window.setTimeout(resolve, milliseconds));
+
 export default function MobileApp() {
   const [loggedInAs, setLoggedInAs] = useState<string | null>(null);
   const [noKeyringAvailable, setNoKeyringAvailable] = useState(false);
   const [status, setStatus] = useState<RuntimeStatus | null>(null);
+  const [tunnelState, setTunnelState] = useState<string>("starting");
   const [restoring, setRestoring] = useState(true);
   const [operationState, setOperationState] = useState<OperationState | null>(null);
 
@@ -47,8 +57,28 @@ export default function MobileApp() {
     try {
       const next = await invoke<RuntimeStatus>("mobile_runtime_status");
       setStatus(next);
+      if (next.tunnelReachable) setTunnelState("connected");
     } catch (error) {
       console.error("Unable to read mobile runtime status", error);
+    }
+  }, []);
+
+  const startTunnel = useCallback(async () => {
+    try {
+      const tunnel = await invoke<TunnelControlStatus>("mobile_tunnel_start");
+      setTunnelState(tunnel.status);
+      for (const wait of [250, 500, 1000]) {
+        await delay(wait);
+        const next = await invoke<RuntimeStatus>("mobile_runtime_status");
+        setStatus(next);
+        if (next.tunnelReachable) {
+          setTunnelState("connected");
+          return;
+        }
+      }
+    } catch (error) {
+      console.error("Unable to start iBridge Tunnel", error);
+      setTunnelState("disconnected");
     }
   }, []);
 
@@ -101,7 +131,8 @@ export default function MobileApp() {
       .catch(() => setNoKeyringAvailable(true));
 
     refreshStatus();
-  }, [refreshStatus]);
+    startTunnel();
+  }, [refreshStatus, startTunnel]);
 
   useEffect(() => {
     let cancelled = false;
@@ -127,12 +158,17 @@ export default function MobileApp() {
       return;
     }
     if (!status?.pairingReady) {
-      toast.error("This iPhone has not been bootstrapped by iBridge Desktop.");
+      toast.error("Connect this iPhone to iBridge Desktop once to finish setup.");
       return;
     }
     if (!status.tunnelReachable) {
-      toast.error("iBridge Tunnel is not reachable yet.");
-      return;
+      await startTunnel();
+      const next = await invoke<RuntimeStatus>("mobile_runtime_status");
+      setStatus(next);
+      if (!next.tunnelReachable) {
+        toast.error("iBridge Tunnel could not connect. Tap Start Tunnel and try again.");
+        return;
+      }
     }
 
     const path = await openFileDialog({
@@ -142,7 +178,7 @@ export default function MobileApp() {
     if (!path) return;
 
     await startOperation(mobileSideloadOperation, { appPath: path as string });
-  }, [loggedInAs, status, startOperation]);
+  }, [loggedInAs, status, startOperation, startTunnel]);
 
   return (
     <main className="workspace">
@@ -152,7 +188,7 @@ export default function MobileApp() {
             <img src={logo} alt="iBridge" className="logo" />
             <div>
               <h1 className="title">iBridge Mobile</h1>
-              <p className="subtitle">One-tap sideloading from this iPhone</p>
+              <p className="subtitle">Choose an IPA. iBridge handles the rest.</p>
             </div>
           </div>
         </div>
@@ -161,26 +197,30 @@ export default function MobileApp() {
       <div className="workspace-body">
         <section className="workspace-content">
           <section className="workspace-section">
-            <p className="section-label">This iPhone</p>
+            <p className="section-label">Ready</p>
             <GlassCard className="panel">
               <div className="workspace-list">
                 <div className="workspace-list-item">
-                  Pairing: {status?.pairingReady ? "Ready" : "Missing"}
+                  Device setup: {status?.pairingReady ? "Ready" : "Needs desktop setup"}
                 </div>
                 <div className="workspace-list-item">
-                  Tunnel: {status?.tunnelReachable ? "Connected" : "Disconnected"}
-                </div>
-                <div className="workspace-list-item">
-                  Host: {status?.tunnelHost ?? "10.7.0.1"}
+                  Local tunnel: {status?.tunnelReachable ? "Connected" : tunnelState}
                 </div>
               </div>
+              {!status?.tunnelReachable && (
+                <div className="action-row">
+                  <button onClick={() => startTunnel().catch(console.error)}>
+                    Start Tunnel
+                  </button>
+                </div>
+              )}
             </GlassCard>
           </section>
 
           <section className="workspace-section">
             <p className="section-label">Apple ID</p>
             <GlassCard className="panel">
-              {restoring && <p>Restoring desktop bootstrap…</p>}
+              {restoring && <p>Restoring desktop setup…</p>}
               <AppleID
                 loggedInAs={loggedInAs}
                 setLoggedInAs={setLoggedInAs}
