@@ -217,6 +217,9 @@ jobs:
       - name: Install frontend dependencies
         run: bun i --frozen-lockfile
 
+      - name: Init iOS Xcode project
+        run: bun run tauri ios init
+
       - name: Build iOS IPA
         run: bun run tauri ios build --target aarch64
 
