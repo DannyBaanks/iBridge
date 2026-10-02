@@ -10,6 +10,7 @@ mod pairing;
 mod secure_storage;
 mod error;
 mod logging;
+mod mobile_bootstrap;
 mod operation;
 
 use crate::{
@@ -20,6 +21,7 @@ use crate::{
     device::{
         DeviceInfoMutex, PairingCancelToken, cancel_pairing, list_devices, set_selected_device,
     },
+    mobile_bootstrap::{MobileBootstrapAuthMutex, install_ibridge_mobile_operation},
     pairing::{
         delete_stored_rppairing, export_pairing_cmd, has_stored_rppairing, installed_pairing_apps,
         place_pairing_cmd,
@@ -101,6 +103,7 @@ pub fn run() {
             app.manage(DeviceInfoMutex::new(None));
             app.manage(SideloaderMutex::new(None));
             app.manage(PairingCancelToken::new(None));
+            app.manage(MobileBootstrapAuthMutex::new(None));
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -113,6 +116,7 @@ pub fn run() {
             sideload_operation,
             set_selected_device,
             install_sidestore_operation,
+            install_ibridge_mobile_operation,
             get_certificates,
             revoke_certificate,
             list_app_ids,
