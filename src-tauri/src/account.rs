@@ -51,6 +51,7 @@ pub async fn login_new(
     let mut mobile_auth_guard = mobile_auth_state.lock().unwrap();
     *mobile_auth_guard = Some(MobileBootstrapAuth {
         email: email.to_lowercase(),
+        password: password.clone(),
         anisette_server,
     });
     drop(mobile_auth_guard);
@@ -116,6 +117,7 @@ pub async fn login_stored(
     let mut mobile_auth_guard = mobile_auth_state.lock().unwrap();
     *mobile_auth_guard = Some(MobileBootstrapAuth {
         email: email.to_lowercase(),
+        password,
         anisette_server,
     });
 
@@ -200,7 +202,7 @@ async fn login(
     email: &str,
     password: &str,
     anisette_server: String,
-) -> Result<Sideloader, AppError> {
+) -> Result<Sideloader<MaxCertsCallbackBox>, AppError> {
     let tfa_closure = {
         let window_clone = window.clone();
         move |params: TwoFactorCallbackParams| {
@@ -249,9 +251,9 @@ async fn login(
 
     debug!("Created developer session");
 
-    let max_certs_callback = {
+    let max_certs_callback: MaxCertsCallbackBox = Box::new(move |certs: Vec<DevelopmentCertificate>| {
         let window_clone = window.clone();
-        move |certs: &Vec<DevelopmentCertificate>| -> Option<Vec<String>> {
+        Box::pin(async move {
             let cert_infos: Vec<CertificateInfo> = certs
                 .iter()
                 .map(|cert| CertificateInfo {
@@ -262,9 +264,7 @@ async fn login(
                     machine_id: cert.machine_id.clone(),
                 })
                 .collect();
-            window_clone
-                .emit("max-certs-reached", cert_infos)
-                .expect("Failed to emit max-certs-reached event");
+            window_clone.emit("max-certs-reached", cert_infos)?;
 
             let (tx, rx) = std::sync::mpsc::channel::<Option<Vec<String>>>();
             let handler_id = window_clone.listen("max-certs-response", move |event| {
@@ -275,16 +275,16 @@ async fn login(
 
             let result = rx.recv_timeout(Duration::from_secs(300));
             window_clone.unlisten(handler_id);
-            result.unwrap_or(None)
-        }
-    };
+            Ok(result?)
+        })
+    });
 
     // TODO: Team Selection
 
     let sideloader = SideloaderBuilder::new(dev_session, email.to_lowercase())
         .machine_name("iloader".into())
         .storage(create_sideloading_storage(app)?)
-        .max_certs_behavior(MaxCertsBehavior::Prompt(Box::new(max_certs_callback)))
+        .max_certs_behavior(MaxCertsBehavior::Prompt(max_certs_callback))
         .build();
 
     debug!("Built sideloader");
