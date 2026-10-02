@@ -1,7 +1,7 @@
 import NetworkExtension
 import Tauri
 
-private let providerBundleIdentifier = "me.dannybaanks.ibridge.mobile.tunnel"
+private let providerBundleIdentifier = "com.dannybaanks.ibridge.mobile.tunnel"
 private let tunnelDeviceIP = "10.7.0.0"
 private let tunnelFakeIP = "10.7.0.1"
 
